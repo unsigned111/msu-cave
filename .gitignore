@@ -1,0 +1,5 @@
+*node_modules
+
+# good place to put all of the projects credentials so that they do not
+# get check into version control accidentally.
+credentials
