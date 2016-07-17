@@ -62,7 +62,8 @@ class Server {
   }
 
   start() {
-    this.server.listen(this.port, () => console.log("Server init"));
+    let msg = "Server running on port " + this.port;
+    this.server.listen(this.port, () => console.log(msg));
   }
 }
 
