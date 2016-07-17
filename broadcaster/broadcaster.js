@@ -24,7 +24,8 @@ class Broadcaster {
     payload[this.headsetID] = {
       raw_data: data,
       timestamp: {
-        server: firebase.database.ServerValue.TIMESTAMP
+        server: firebase.database.ServerValue.TIMESTAMP,
+        node: (new Date()).getTime()
       }
     };
     this._ref.set(payload);
