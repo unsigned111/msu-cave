@@ -30,7 +30,7 @@ function finalizeResponse(request, response, statusCode, body) {
 }
 
 function broadcast(request, response, body) {
-  firebaseBroadcaster.push(body);
+  firebaseBroadcaster.publish(body);
   finalizeResponse(request, response, 200, {});
 }
 

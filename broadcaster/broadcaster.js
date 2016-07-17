@@ -23,7 +23,7 @@ class Broadcaster {
     this.ref = this.db.ref(path);
   }
 
-  push(data) {
+  publish(data) {
     this.ref.set({ cur_data: data });
   }
 }
