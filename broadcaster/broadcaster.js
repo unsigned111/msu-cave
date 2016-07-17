@@ -21,7 +21,12 @@ class Broadcaster {
 
   publish(data) {
     let payload = {};
-    payload[this.headsetID] = data;
+    payload[this.headsetID] = {
+      raw_data: data,
+      timestamp: {
+        server: firebase.database.ServerValue.TIMESTAMP
+      }
+    };
     this._ref.set(payload);
   }
 
