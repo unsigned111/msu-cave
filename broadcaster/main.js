@@ -1,11 +1,8 @@
 /*jslint node: true, esversion: 6 */
 'use strict';
 
-var http = require('http');
-var jsonBody = require('body/json');
-
-var validator = require('./validator');
 var broadcaster = require('./broadcaster');
+var server = require('./server');
 
 // TODO:DLM: bring in from command line
 let CREDENTIALS = '../credentials/msu-cave-f3ae939d1917.json';
@@ -17,51 +14,22 @@ let PORT = 3000;
 let db = new broadcaster.firebaseDB(CREDENTIALS, DATABASE_URL);
 let firebaseBroadcaster = new broadcaster.Broadcaster(db, INSTALLATION_ID, HEADSET_ID);
 
-
-function onNewData(snapshot) {
+// initialize so that every time remote data is updated the onRemoteData
+// method is called.  This should hook into the covariance calculator either
+// by sending a message to the covariance sevice or calling directly.
+function onRemoteData(snapshot) {
+  // NOTE:DLM: whoever is doing the covariance, this is where you can hook
+  // in your code or call your service.  If you are going to call your
+  // service, I recommend using the requests module
+  // https://github.com/request/request
   console.log(snapshot.val());
 }
-firebaseBroadcaster.subscribe(onNewData);
+firebaseBroadcaster.subscribe(onRemoteData);
 
-function finalizeResponse(request, response, statusCode, body) {
-  response.statusCode = statusCode;
-  response.write(JSON.stringify(body));
-  console.log("Processed:" + request.url + " status:" + response.statusCode);
-  response.end();
-}
-
-function broadcast(request, response, body) {
+// setup the server so that everyting it receives some new data it is
+// published to the remote data.
+function onLocalData(body) {
   firebaseBroadcaster.publish(body);
-  finalizeResponse(request, response, 200, {});
 }
-
-function processValidBody(request, response, body) {
-  let validData = validator.validate(body);
-  if (! validData.success) {
-    finalizeResponse(request, response, 400, validData.response);
-  } else {
-    broadcast(request, response, body);
-  }
-}
-
-function handleServerError(request, response, message, error) {
-  let responseBody = {
-    errorMessage: message,
-    developer: error
-  };
-  finalizeResponse(request, response, 500, responseBody);
-}
-
-function handleRequest(request, response) {
-  function processBody(err, body) {
-    if (err) {
-      handleServerError(request, response, "Error processing body", err);
-    } else {
-      processValidBody(request, response, body);
-    }
-  }
-  jsonBody(request, response, processBody);
-}
-
-var server = http.createServer(handleRequest);
-server.listen(PORT, () => console.log("Server init"));
+var server = new server.Server(PORT, onLocalData);
+server.start();
