@@ -17,6 +17,10 @@ let PORT = 3000;
 let path = 'test_data/yeah';
 let firebaseRef = new broadcaster.FirebaseRef(CREDENTIALS, DATABASE_URL);
 let firebaseBroadcaster = new broadcaster.Broadcaster(firebaseRef.database(), path);
+function onNewData(snapshot) {
+  console.log(snapshot.val());
+}
+firebaseBroadcaster.subscribe(onNewData);
 
 function echo(output) {
   return function() { console.log(output); };

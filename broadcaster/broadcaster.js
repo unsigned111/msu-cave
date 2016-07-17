@@ -26,6 +26,10 @@ class Broadcaster {
   publish(data) {
     this.ref.set({ cur_data: data });
   }
+
+  subscribe(callback) {
+    this.ref.on('value', callback);
+  }
 }
 
 module.exports.FirebaseRef = FirebaseRef;
