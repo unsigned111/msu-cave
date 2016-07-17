@@ -26,8 +26,8 @@ function onRemoteData(snapshot) {
 }
 firebaseBroadcaster.subscribe(onRemoteData);
 
-// setup the server so that everyting it receives some new data it is
-// published to the remote data.
+// setup the server so that everything it receives some new data it is
+// published to the remote data server.
 function onLocalData(body) {
   firebaseBroadcaster.publish(body);
 }
