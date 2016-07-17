@@ -15,8 +15,10 @@ let PORT = 3000;
 // TODO:DLM: the path is constructed from path concating the
 // installation and the headset id
 let path = 'test_data/yeah';
-let firebaseRef = new broadcaster.FirebaseRef(CREDENTIALS, DATABASE_URL);
-let firebaseBroadcaster = new broadcaster.Broadcaster(firebaseRef.database(), path);
+let db = new broadcaster.firebaseDB(CREDENTIALS, DATABASE_URL);
+let firebaseBroadcaster = new broadcaster.Broadcaster(db, path);
+
+
 function onNewData(snapshot) {
   console.log(snapshot.val());
 }

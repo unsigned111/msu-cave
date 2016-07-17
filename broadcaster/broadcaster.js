@@ -3,17 +3,12 @@
 
 var firebase = require('firebase');
 
-class FirebaseRef {
-  constructor(credentials, url) {
-    this.app = firebase.initializeApp({
-      serviceAccount: credentials,
-      databaseURL: url,
-    });
-  }
-
-  database() {
-    return firebase.database();
-  }
+function firebaseDB(credentials, url) {
+  firebase.initializeApp({
+    serviceAccount: credentials,
+    databaseURL: url,
+  });
+  return firebase.database();
 }
 
 class Broadcaster {
@@ -32,6 +27,6 @@ class Broadcaster {
   }
 }
 
-module.exports.FirebaseRef = FirebaseRef;
+module.exports.firebaseDB = firebaseDB;
 module.exports.Broadcaster = Broadcaster;
 
