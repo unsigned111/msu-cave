@@ -44,14 +44,18 @@ function processValidBody(request, response, body) {
   }
 }
 
+function handleServerError(request, response, message, error) {
+  let responseBody = {
+    errorMessage: message,
+    developer: error
+  };
+  finalizeResponse(request, response, 500, responseBody);
+}
+
 function handleRequest(request, response) {
   function processBody(err, body) {
     if (err) {
-      let responseBody = {
-        errorMessage: "Error processing body",
-        developer: err
-      };
-      finalizeResponse(request, response, 500, responseBody);
+      handleServerError(request, response, "Error processing body", err);
     } else {
       processValidBody(request, response, body);
     }
