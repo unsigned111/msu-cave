@@ -12,18 +12,29 @@ function firebaseDB(credentials, url) {
 }
 
 class Broadcaster {
-  constructor(database, path) {
+  constructor(database, installationID, headsetID) {
     this.db = database;
-    this.path = path;
-    this.ref = this.db.ref(path);
+    this.installationID = installationID;
+    this.headsetID = headsetID;
+    this._ref = this.db.ref(this.latestPath);
   }
 
   publish(data) {
-    this.ref.set({ cur_data: data });
+    let payload = {};
+    payload[this.headsetID] = data;
+    this._ref.set(payload);
   }
 
   subscribe(callback) {
-    this.ref.on('value', callback);
+    this._ref.on('value', callback);
+  }
+
+  get installationPath() {
+    return 'installations/' + this.installationID;
+  }
+
+  get latestPath() {
+    return this.installationPath + '/latest';
   }
 }
 

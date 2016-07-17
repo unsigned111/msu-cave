@@ -10,13 +10,12 @@ var broadcaster = require('./broadcaster');
 // TODO:DLM: bring in from command line
 let CREDENTIALS = '../credentials/msu-cave-f3ae939d1917.json';
 let DATABASE_URL = 'https://msu-cave.firebaseio.com';
+let INSTALLATION_ID = 'installation-id';
+let HEADSET_ID = 'headset-id';
 let PORT = 3000;
 
-// TODO:DLM: the path is constructed from path concating the
-// installation and the headset id
-let path = 'test_data/yeah';
 let db = new broadcaster.firebaseDB(CREDENTIALS, DATABASE_URL);
-let firebaseBroadcaster = new broadcaster.Broadcaster(db, path);
+let firebaseBroadcaster = new broadcaster.Broadcaster(db, INSTALLATION_ID, HEADSET_ID);
 
 
 function onNewData(snapshot) {
