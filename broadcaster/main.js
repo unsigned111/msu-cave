@@ -23,10 +23,6 @@ function onNewData(snapshot) {
 }
 firebaseBroadcaster.subscribe(onNewData);
 
-function echo(output) {
-  return function() { console.log(output); };
-}
-
 function finalizeResponse(request, response, statusCode, body) {
   response.statusCode = statusCode;
   response.write(JSON.stringify(body));
@@ -64,4 +60,4 @@ function handleRequest(request, response) {
 }
 
 var server = http.createServer(handleRequest);
-server.listen(PORT, echo("Server init"));
+server.listen(PORT, () => console.log("Server init"));
