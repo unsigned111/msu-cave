@@ -3,3 +3,7 @@
 # good place to put all of the projects credentials so that they do not
 # get check into version control accidentally.
 credentials
+
+headset_bridge/headset_bridge
+headset_bridge/pkg/*
+headset_bridge/src/*
