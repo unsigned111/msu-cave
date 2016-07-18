@@ -7,21 +7,33 @@ It is built using [firebase](https://console.firebase.google.com/) as the shared
 data source.  To set up a new firebase see [setting up a firebase
 project](https://firebase.google.com/docs/server/setup)
 
-TODO:DLM: Add the command for running it should pass in (at least)
-* firebase key
-* url of firebase root
-* id of instalation
-* id of node
+Broadcaster is written in node.js and dependencies are managed with npm (node
+package manager).  See [node install](https://nodejs.org/en/) for direction on
+installing node (npm now comes bundled as part of node.js).
 
-The project is written in node.  Dependency management is with npm.  When adding
-a new dependency, to create a reproducible build, please install with
+When adding a new dependency, to create a reproducible build, please install
+with
 
 ```
     npm install package-name --save --save-exact
 ```
 
+# Running
+
+This description assumes the setup which I am using on my dev machine.  Firebase
+requires a credential file, which is NOT in version control.  Please contact me
+if you need credentials.
+
+Provided that you are using the setup in my dev machine, you can run the
+broadcaster with the command:
+```
+    node main.js -i [instllation id]  -e [eeg headset id]
+```
+
+There are additional arguments, but these are only needed if you are trying to
+run on a different Firebase or dev environment.
+
 # NOTES
-Currently anyone can write to the db, and we are connecting as an admin,
-we may want to consider in a later iteration adding some auth
-but that shouldn't stop us now
+* Currently we are connect to the db as an admin, we may want to consider
+in a later iteration adding some auth but that shouldn't stop us now
 
