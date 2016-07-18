@@ -2,6 +2,8 @@ package main
 
 import (
     "fmt"
+    "os"
+    "os/signal"
     "encoding/json"
     "github.com/parnurzeal/gorequest"
 
@@ -75,4 +77,14 @@ func main() {
     robot1 := makeRobot("A", "/dev/tty.MindWaveMobile-DevA")
     gbot.AddRobot(robot1)
     gbot.Start()
+
+    c := make(chan os.Signal, 1)
+    signal.Notify(c, os.Interrupt)
+    go func(){
+        for sig := range c {
+            fmt.Println("Shutting down from ", sig)
+            gbot.Stop()
+            os.Exit(1)
+        }
+    }()
 }
