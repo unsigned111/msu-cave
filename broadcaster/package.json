@@ -1,0 +1,22 @@
+{
+  "name": "broadcaster",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "mocha --ui tdd"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body": "5.1.0",
+    "firebase": "3.2.0",
+    "payload-validator": "1.0.4",
+    "yargs": "4.8.1"
+  },
+  "devDependencies": {
+    "chai": "3.5.0",
+    "mocha": "2.5.3"
+  }
+}
