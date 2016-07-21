@@ -1,7 +1,7 @@
-# Setup a guard that we are running
-#   > make
-# and we are in the current direcotry.  Setting up the path for
-# go is much easier if we just run make from the expected directory.
+# Setup a guard that we are running `make`
+# in the current directory. This could be improved, however,
+# Setting up the path for  go is much easier if we just run make
+# from the expected directory.
 REL_PWD := $(dir $(lastword $(MAKEFILE_LIST)))
 PWD := $(abspath ${REL_PWD})
 ifneq (${REL_PWD}, ./)
@@ -12,24 +12,33 @@ endif
 export GOPATH=${PWD}
 export GOBIN=${PWD}/bin/
 
-run: build
+all: headset_bridge
+
+# sometimes it is nice to type make run while doing development
+run: headset_bridge
 	./headset_bridge
 
-build: pkg
-	go build
+headset_bridge: pkg headset_bridge.go
+	go build -o headset_bridge
 
 # depend is just an alias for pkg.
 depend: pkg
 
-# get, build, and install the dependencies.
+# get, build, and install the dependencies.  Note that this requires
+# an internet connection.  You will not be able to do this successfully
+# while off line.
 pkg:
 	go get -d -u github.com/hybridgroup/gobot/...
 	go install github.com/hybridgroup/gobot/platforms/neurosky
 	go get github.com/parnurzeal/gorequest
 
+# standard go clean
 clean:
 	go clean
 
+# clean up whatever go compiler creates and all of the dependencies.
+# Note that if you do this while off line you will no longer be able to
+# re-recompile.
 veryclean: clean
 	rm -rf ${PWD}/src/
 	rm -rf ${PWD}/pkg/
