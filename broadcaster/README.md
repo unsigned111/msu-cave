@@ -34,6 +34,7 @@ There are additional arguments, but these are only needed if you are trying to
 run on a different Firebase or dev environment.
 
 # NOTES
-* Currently we are connect to the db as an admin, we may want to consider
-in a later iteration adding some auth but that shouldn't stop us now
+* The data is only accessable to admins, so, currently we are connect to the
+db as an admin.  We may want to consider in a later iteration adding better
+access control but that shouldn't stop us now.
 
