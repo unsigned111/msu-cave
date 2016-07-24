@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"github.com/parnurzeal/gorequest"
 	"os"
@@ -71,14 +72,29 @@ func makeRobot(device string, url string) *gobot.Robot {
 	return robot
 }
 
-func main() {
-	device_address := "/dev/tty.MindWaveMobile-DevA"
-	url := "http://localhost:3000"
+type AppArgs struct {
+	Device string
+	Url    string
+}
 
-	robot1 := makeRobot(device_address, url)
-	gbot := gobot.NewGobot()
-	gbot.AddRobot(robot1)
-	gbot.Start()
+func parseArgs() AppArgs {
+	device := flag.String(
+		"d",
+		"/dev/tty.MindWaveMobile-DevA",
+		"Address of the device from where the headset conncets",
+	)
+	url := flag.String(
+		"p",
+		"http://localhost:3000",
+		"Url to send headset data",
+	)
+	flag.Parse()
+	args := AppArgs{Device: *device, Url: *url}
+
+	fmt.Println("Connecting to:", args.Device)
+	fmt.Println("Sending data to:", args.Url)
+	return args
+}
 
 func cleanUpFunction(gbot *gobot.Gobot) func() {
 	c := make(chan os.Signal, 1)
@@ -91,6 +107,18 @@ func cleanUpFunction(gbot *gobot.Gobot) func() {
 		}
 	}
 }
+
+func main() {
+	// parse the command line arguments
+	args := parseArgs()
+
+	// make the robot
+	robot1 := makeRobot(args.Device, args.Url)
+
+	// initialize gobot
+	gbot := gobot.NewGobot()
+	gbot.AddRobot(robot1)
+	gbot.Start()
 
 	// set the ctrl-c handler
 	cleanup := cleanUpFunction(gbot)
