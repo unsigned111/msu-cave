@@ -81,7 +81,7 @@ func parseArgs() AppArgs {
 	device := flag.String(
 		"d",
 		"/dev/tty.MindWaveMobile-DevA",
-		"Address of the device from where the headset conncets",
+		"Address of the device from where the headset connects",
 	)
 	url := flag.String(
 		"p",
