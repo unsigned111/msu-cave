@@ -80,13 +80,19 @@ func main() {
 	gbot.AddRobot(robot1)
 	gbot.Start()
 
+func cleanUpFunction(gbot *gobot.Gobot) func() {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
-	go func() {
+	return func() {
 		for sig := range c {
 			fmt.Println("Shutting down from ", sig)
 			gbot.Stop()
 			os.Exit(1)
 		}
-	}()
+	}
+}
+
+	// set the ctrl-c handler
+	cleanup := cleanUpFunction(gbot)
+	go cleanup()
 }
