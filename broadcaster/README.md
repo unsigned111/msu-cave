@@ -18,6 +18,10 @@ with
     npm install package-name --save --save-exact
 ```
 
+When developing, it is sometimes useful to be able to easily send requests to
+a running server.  The script `generate_request.sh` sends requests of
+various types using [httpie](https://github.com/jkbrzt/httpie)
+
 # Running
 
 This description assumes the setup which I am using on my dev machine.  Firebase
