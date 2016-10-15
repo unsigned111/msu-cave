@@ -42,7 +42,7 @@ class Poller(threading.Thread):
     def read_artnet(self):
         try:
             data, addr = self.sock.recvfrom(1024)
-        except socket.error, e:
+        except socket.error as e:
             time.sleep(0.1)
             return None
 

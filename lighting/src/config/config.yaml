@@ -1,0 +1,6 @@
+{
+    "listen_ip": "127.0.0.1",
+    "listen_port": 57121,
+    "controller_ip": "10.7.153.129",
+    "lighting_configuration": "./config/rigs/pod-rig.yaml",
+}
