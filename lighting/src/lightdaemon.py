@@ -17,15 +17,7 @@ import logging
 def main():
     message_queue = Queue.Queue()
 
-    config_file = './config/config.yaml'
-    with open(config_file, 'r') as filehandler:
-        try:
-            config = yaml.load(filehandler)
-        except IOError as exc:
-            print("Error parsing config")
-            print exc
-            sys.exit()
-
+    config = MasterControl.load_config()
     control = CaveController(config, message_queue)
     output_thread = threading.Thread(target=control.run)
     output_thread.setDaemon(True)
@@ -38,20 +30,30 @@ def main():
 
     try:
         while True:
-            time.sleep(150)
-    except:
-        print "Killed"
+            time.sleep(10000)
+    except KeyboardInterrupt:
         control.stop()
-        time.sleep(0.5)
+        print("Server Killed")
+
+
+class MasterControl(object):
+    @staticmethod
+    def load_config(path='./config/config.yaml'):
+        with open(path, 'r') as filehandler:
+            try:
+                config = yaml.load(filehandler)
+            except IOError as exc:
+                print("Error parsing config")
+                print exc
+                sys.exit()
+        return config
 
 
 class CaveController(object):
     def __init__(self, config, message_queue):
-        self.light_controller = dmx.Controller(config['controller_ip'], fps=10.0)
+        self.light_controller = dmx.Controller(config['controller_ip'], fps=45.0)
         self.rig = artnet.rig.load(config['lighting_configuration'])
         self.light = self.rig.groups['all']
-        self.light.setColor('#FF0000')
-        self.light.setIntensity(config['min_intensity'])
         self.add_generator(self.get_frames)
         self.message_queue = message_queue
         self.headset_on = False
@@ -64,7 +66,8 @@ class CaveController(object):
                 message = self.message_queue.get()
                 light.setColor(message.hex())
                 light.setIntensity(message.intensity)
-                yield light.getFrame()
+                frame = light.getFrame()
+                yield frame
             except Queue.Empty:
                 pass
 
@@ -76,14 +79,16 @@ class CaveController(object):
         self.start()
 
     def start(self):
-        self.light.setIntensity(0)
         self.light_controller.start()
 
     def stop(self):
+        self.blackout()
+        self.light_controller.stop()
+
+    def blackout(self):
         self.message_queue.empty()
         self.message_queue.put(ColorMessage.blackout())
         self.light.setIntensity(0)
-        self.light_controller.stop()
 
 
 class CaveListener(object):
@@ -124,31 +129,77 @@ class CaveListener(object):
         else:
             self.controller.headset_on = False
             self.controller.message_queue.empty()
-            self.controller.message_queue.put(ColorMessage.blackout())
+            self.controller.message_queue.put(ColorMessage.whiteout())
 
 
 class ColorMessage(object):
     def __init__(self, red, green, blue, intensity):
+        self.__boundary_test(red, green, blue, intensity)
         self.red = red
         self.green = green
         self.blue = blue
         self.intensity = intensity
 
+    @staticmethod
+    def __boundary_test(*args):
+        for i in args:
+            if not isinstance(i, int):
+                raise TypeError("Expected a type of int, but got {0}".format(type(i)))
+            if i > 255 or i < 0:
+                raise ValueError("Expected a value between 0 and 255, but got {0}".format(i))
+
+    @staticmethod
+    def from_np(np_array):
+        if not isinstance(np_array, np.ndarray):
+            raise TypeError('Expected an object of type numpy.ndarray, but got ' + type(np_array))
+        if not (np_array.dtype == np.dtype('int32') or np_array.dtype == np.dtype('int64')):
+            raise TypeError('Expected an numpy.ndarray object of dtype<int32/int64>, but got dtype<{0}>'.format(
+                np_array.dtype))
+        return ColorMessage(*np_array.flatten())
+
+    def as_np(self):
+        return np.array([self.red, self.green, self.blue, self.intensity])
+
     def hex(self):
-        return artnet.fixtures.rgb_to_hex((self.red, self.green, self.blue))
+        hex_string = artnet.fixtures.rgb_to_hex((self.red, self.green, self.blue))
+        return hex_string
+
+    def interp(self, next_color, count):
+        red_interp = self._interp(self.red, next_color.red, count)
+        green_interp = self._interp(self.green, next_color.green, count)
+        blue_interp = self._interp(self.blue, next_color.blue, count)
+        intensity_interp = self._interp(self.intensity, next_color.intensity, count)
+        combined = np.vstack((red_interp, green_interp, blue_interp, intensity_interp))
+        return [ColorMessage.from_np(i) for i in combined.transpose().round().astype(int)]
+
+    @staticmethod
+    def _interp(start, end, num):
+        return np.interp(
+            np.array(np.linspace(0, 1, num)),
+            np.array([0, 1]),
+            np.array([start, end]))
 
     @staticmethod
     def blackout():
-        return ColorMessage(0, 0, 0, 0)
+        new_color = ColorMessage(0, 0, 0, 0)
+        return new_color
 
     @staticmethod
     def whiteout():
-        return ColorMessage(255, 255, 255, 255)
+        new_color = ColorMessage(255, 255, 255, 255)
+        return new_color
+
+    def __eq__(self, other):
+        return self.as_np().all() == other.as_np().all()
 
     def __unicode__(self):
-        return "({0}, {1}, {2}) ~ {3}".format(self.red, self.green, self.blue, self.intensity)
+        string = "({0}, {1}, {2}) ~ {3}".format(self.red, self.green, self.blue, self.intensity)
+        return string
 
     def __str__(self):
+        return self.__unicode__()
+
+    def __repr__(self):
         return self.__unicode__()
 
 
@@ -156,47 +207,28 @@ class ColorGenerator(object):
     def __init__(self, config):
         self.start_color = ColorMessage(
             config["start_color"]["red"],
-            config["start_color"]["blue"],
             config["start_color"]["green"],
+            config["start_color"]["blue"],
             config["min_intensity"])
         self.end_color = ColorMessage(
             config["end_color"]["red"],
-            config["end_color"]["blue"],
             config["end_color"]["green"],
+            config["end_color"]["blue"],
             config["min_intensity"])
         self.last_color = ColorMessage(0, 0, 0, self.start_color.intensity)
         self.granularity = config["color_granularity"]
-        self.last_target = 0.0
 
     def get_colors(self, target):
-        target_color = ColorMessage(
+        next_color = ColorMessage(
             int(target * (self.end_color.red - self.start_color.red) + self.start_color.red),
             int(target * (self.end_color.green - self.start_color.green) + self.start_color.green),
             int(target * (self.end_color.blue - self.start_color.blue) + self.start_color.blue),
             self.start_color.intensity,
         )
-
-        increment = (target - self.last_target) / self.granularity
-
-        to_return = list()
-        for i in xrange(self.granularity):
-            new_red = self.interpolate(
-                self.start_color.red, self.end_color.red, i * increment + self.last_target)
-            new_green = self.interpolate(
-                self.start_color.green, self.end_color.green, i * increment + self.last_target)
-            new_blue = self.interpolate(
-                self.start_color.blue, self.end_color.blue, i * increment + self.last_target)
-            interm_color = ColorMessage(
-                new_red, new_green, new_blue, self.start_color.intensity,)
-            to_return.append(interm_color)
-
-        self.last_color = target_color
-        self.last_target = target
+        to_return = self.last_color.interp(next_color, self.granularity)
+        print "{0} => {1}".format(self.last_color, next_color)
+        self.last_color = next_color
         return to_return
-
-    @staticmethod
-    def interpolate(y0, y1, x, x0=0.0, x1=1.0):
-        return int(y0 + (x * (x1 - x0)) * ((y1 - y0)/(x1 - x0)))
 
 
 if __name__ == "__main__":

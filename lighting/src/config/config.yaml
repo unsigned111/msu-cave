@@ -3,17 +3,17 @@
     "listen_port": 57121,
     "controller_ip": "10.7.153.129",
     "lighting_configuration": "./config/rigs/pod-rig.yaml",
-    "min_intensity": 100,
+    "min_intensity": 30,
     "max_intensity": 255,
     "start_color": {
       "red": 255,
-      "green": 120,
+      "green": 0,
       "blue": 0,
     },
     "end_color": {
-      "red": 108,
+      "red": 0,
       "green": 0,
       "blue": 255,
     },
-    "color_granularity": 15,
+    "color_granularity": 20,
 }

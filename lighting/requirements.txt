@@ -6,6 +6,7 @@ decorator==4.0.9
 gnureadline==6.3.3
 ipython==4.1.2
 ipython-genutils==0.1.0
+numpy==1.11.2
 path.py==8.1.2
 pexpect==4.0.1
 pickleshare==0.6
