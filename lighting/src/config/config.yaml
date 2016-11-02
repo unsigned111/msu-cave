@@ -1,13 +1,14 @@
 {
-    "listen_ip": "192.168.1.109",
+    "listen_ip": "153.90.59.117",
+    #"listen_ip": "192.168.1.109",
     "listen_port": 57121,
     "controller_ip": "10.7.153.129",
     "lighting_configuration": "./config/rigs/pod-rig.yaml",
-    "min_intensity": 30,
+    "min_intensity": 255,
     "max_intensity": 255,
     "start_color": {
-      "red": 255,
-      "green": 0,
+      "red": 0,
+      "green": 255,
       "blue": 0,
     },
     "end_color": {
@@ -15,5 +16,11 @@
       "green": 0,
       "blue": 255,
     },
-    "color_granularity": 20,
+    "headsetoff_color": {
+      "red": 255,
+      "green": 255,
+      "blue": 255,
+      "intensity": 45,
+    },
+    "color_granularity": 10,
 }

@@ -9,7 +9,7 @@ import OSC
 import Queue
 import numpy as np
 
-import logging
+#import logging
 #logging.basicConfig(level=logging.DEBUG)
 #log = logging.getLogger(__name__)
 
@@ -101,6 +101,8 @@ class CaveListener(object):
         self.server.addMsgHandler("/occupied", self.occupied_handler)
         self.controller = controller
         self.color_gen = ColorGenerator(config)
+        for i in self.color_gen.get_headset_trans():
+            self.controller.message_queue.put(i)
 
     def run(self):
         self.server.serve_forever()
@@ -129,7 +131,9 @@ class CaveListener(object):
         else:
             self.controller.headset_on = False
             self.controller.message_queue.empty()
-            self.controller.message_queue.put(ColorMessage.whiteout())
+            messages = self.color_gen.get_headset_trans()
+            for i in messages:
+                self.controller.message_queue.put(i)
 
 
 class ColorMessage(object):
@@ -215,7 +219,12 @@ class ColorGenerator(object):
             config["end_color"]["green"],
             config["end_color"]["blue"],
             config["min_intensity"])
-        self.last_color = ColorMessage(0, 0, 0, self.start_color.intensity)
+        self.off_color = ColorMessage(
+            config["headsetoff_color"]["red"],
+            config["headsetoff_color"]["green"],
+            config["headsetoff_color"]["blue"],
+            config["headsetoff_color"]["intensity"])
+        self.last_color = self.off_color
         self.granularity = config["color_granularity"]
 
     def get_colors(self, target):
@@ -228,6 +237,11 @@ class ColorGenerator(object):
         to_return = self.last_color.interp(next_color, self.granularity)
         print "{0} => {1}".format(self.last_color, next_color)
         self.last_color = next_color
+        return to_return
+
+    def get_headset_trans(self):
+        to_return = self.last_color.interp(self.off_color, self.granularity)
+        self.last_color = self.off_color
         return to_return
 
 
