@@ -23,7 +23,7 @@ instr 1
 	kans OSClisten giosc1, "/eeg", "iiiiiiii", k1, k2, k3, k4, k5, k6, k7, k8
 	printk 0, k1
 
-	aosc oscil k1/100000, 440, 1
+	aosc oscil 100, 440+50*(1578604-k2)/1000000, 1
 	outs aosc, aosc
 endin
 
@@ -33,7 +33,7 @@ endin
 f 1 0 1024 10 1
 i 1 0 300
 </CsScore>
-</CsoundSynthesizer>kk
+</CsoundSynthesizer>
 <bsbPanel>
  <label>Widgets</label>
  <objectName/>
