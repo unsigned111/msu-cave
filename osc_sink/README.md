@@ -19,3 +19,7 @@ If you would like to try out a simple client run the client:
 ```
     python3 oscclient.py
 ```
+
+# CSound
+
+There is also a tool for testing with csound located in `csound`
