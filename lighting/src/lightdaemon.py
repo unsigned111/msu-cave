@@ -118,7 +118,9 @@ class CaveListener(object):
             for i in messages:
                 self.controller.message_queue.put(i)
         else:
-            pass
+            messages = self.color_gen.get_headset_pulse()
+            for i in messages:
+                self.controller.message_queue.put(i)
 
     def occupied_handler(self, *vals):
         value = vals[2][0]
@@ -244,6 +246,14 @@ class ColorGenerator(object):
         self.last_color = self.off_color
         return to_return
 
+    def get_headset_pulse(self):
+        off_color_low = self.off_color
+        off_color_high = ColorMessage(
+            self.off_color.red, self.off_color.green, self.off_color.blue,
+            self.off_color.intensity * 1.5)
+        pulse_up = off_color_low.interp(off_color_high, self.granularity/2)
+        pulse_down = off_color_high.interp(off_color_low, self.granularity/2)
+        return pulse_up + pulse_down
 
 if __name__ == "__main__":
     main()
