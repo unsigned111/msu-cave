@@ -1,14 +1,15 @@
 {
-    "listen_ip": "153.90.59.117",
+    #"listen_ip": "153.90.59.117",
     #"listen_ip": "192.168.1.109",
+    "listen_ip": "127.0.0.1",
     "listen_port": 57121,
     "controller_ip": "10.7.153.129",
     "lighting_configuration": "./config/rigs/pod-rig.yaml",
     "min_intensity": 255,
     "max_intensity": 255,
     "start_color": {
-      "red": 0,
-      "green": 255,
+      "red": 255,
+      "green": 0,
       "blue": 0,
     },
     "end_color": {
@@ -22,5 +23,11 @@
       "blue": 255,
       "intensity": 45,
     },
+    "pulse_amount": 3.0,
+    "pulse_length": 4,
+    "pulse_pause": 4,
     "color_granularity": 10,
+    "default_on": False,
+    "channel_id": 3,
+    "scaler": 17000000,
 }

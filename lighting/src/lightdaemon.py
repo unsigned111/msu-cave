@@ -95,36 +95,44 @@ class CaveListener(object):
     def __init__(self, config, controller):
         self.ip = config['listen_ip']
         self.port = config['listen_port']
+        self.controller = controller
+        self.color_gen = ColorGenerator(config)
+        if config['default_on']:
+            self.controller.headset_on = True
         self.server = OSC.ThreadingOSCServer(
             (self.ip, self.port))
         self.server.addMsgHandler("/eeg", self.handler)
         self.server.addMsgHandler("/occupied", self.occupied_handler)
-        self.controller = controller
-        self.color_gen = ColorGenerator(config)
-        for i in self.color_gen.get_headset_trans():
-            self.controller.message_queue.put(i)
+
+        self.pulser = Pulser(self.controller, self.color_gen)
+        self.pulser_thread = threading.Thread(target=self.pulser.run)
+        self.pulser_thread.setDaemon(True)
+        self.pulser_thread.start()
+        self.channel_id = config["channel_id"]
+        self.scaler = config["scaler"]
+
+        #for i in self.color_gen.get_headset_trans():
+        #    self.controller.message_queue.put(i)
 
     def run(self):
         self.server.serve_forever()
 
     def stop(self):
         self.server.close()
+        self.controller.headset_on = False
+        self.pulser.stop()
 
-    def handler(self, *vals):
-        value = vals[2][0]
-        print vals
+    def handler(self, args, *vals):
+        value = self.scale(vals[1][self.channel_id], self.scaler)
         if self.controller.headset_on:
             messages = self.color_gen.get_colors(value)
             for i in messages:
                 self.controller.message_queue.put(i)
         else:
-            messages = self.color_gen.get_headset_pulse()
-            for i in messages:
-                self.controller.message_queue.put(i)
+            pass
 
-    def occupied_handler(self, *vals):
+    def occupied_handler(self, args, *vals):
         value = vals[2][0]
-        print vals
         if value:
             self.controller.headset_on = True
             messages = self.color_gen.get_colors(value)
@@ -136,6 +144,29 @@ class CaveListener(object):
             messages = self.color_gen.get_headset_trans()
             for i in messages:
                 self.controller.message_queue.put(i)
+
+    @staticmethod
+    def scale(value, scaler):
+        print value
+        scaled = value / float(scaler)
+        print scaled
+        return scaled
+
+class Pulser(object):
+    def __init__(self, controller, color_gen):
+        self.controller = controller
+        self.color_gen = color_gen
+
+    def run(self):
+        while(True):
+            if not self.controller.headset_on:
+                messages = self.color_gen.get_headset_pulse()
+                for i in messages:
+                    self.controller.message_queue.put(i)
+            time.sleep(2.0)
+
+    def stop(self):
+        self.controller.message_queue.empty()
 
 
 class ColorMessage(object):
@@ -228,6 +259,8 @@ class ColorGenerator(object):
             config["headsetoff_color"]["intensity"])
         self.last_color = self.off_color
         self.granularity = config["color_granularity"]
+        self.pulse_amount = config["pulse_amount"]
+        self.pulse_length = config["pulse_length"]
 
     def get_colors(self, target):
         next_color = ColorMessage(
@@ -250,9 +283,9 @@ class ColorGenerator(object):
         off_color_low = self.off_color
         off_color_high = ColorMessage(
             self.off_color.red, self.off_color.green, self.off_color.blue,
-            self.off_color.intensity * 1.5)
-        pulse_up = off_color_low.interp(off_color_high, self.granularity/2)
-        pulse_down = off_color_high.interp(off_color_low, self.granularity/2)
+            int(self.off_color.intensity * self.pulse_amount))
+        pulse_up = off_color_low.interp(off_color_high, self.granularity * self.pulse_length)
+        pulse_down = off_color_high.interp(off_color_low, self.granularity * self.pulse_length)
         return pulse_up + pulse_down
 
 if __name__ == "__main__":
