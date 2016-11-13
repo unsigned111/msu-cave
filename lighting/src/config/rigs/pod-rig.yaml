@@ -1,0 +1,17 @@
+# Our pod's rig configuration
+{
+    "name": "Fixture Rig",
+    
+    "fixtures": {
+        "leh4091dmx_1": {
+            "address": 1,
+            "config": "leh/leh-4091.yaml"
+        },
+    },
+    
+    "groups": {
+        "all": ["leh4091dmx_1",],
+        "odds": ["leh4091dmx_1",],
+        "evens": [],
+    },
+}
