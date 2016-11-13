@@ -40,7 +40,7 @@ python lightdaemon.py
 
 ## Equipment requirements
 The lighting equipment should be physically connected following the diagram found in
-![diagram](Diagram.png)
+![diagram](src/Diagram.png)
 
 Make sure that the DMX output port on the Enttec box is connected to the DMX input port on the light.
 
