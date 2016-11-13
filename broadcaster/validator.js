@@ -4,8 +4,15 @@ var payloadValidator = require('payload-validator');
 
 function requiredFields() {
   return [
-    'delta', 'theta', 'loAlpha', 'hiAlpha', 'loBeta', 'hiBeta',
-    'loGamma', 'midGamma'
+    'timestamp',
+    'delta',
+    'hiAlpha',
+    'hiBeta',
+    'loAlpha',
+    'loBeta',
+    'loGamma',
+    'midGamma',
+    'theta',
   ];
 }
 

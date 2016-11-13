@@ -15,6 +15,7 @@ suite('validator', function() {
       hiBeta: 6,
       loGamma: 7,
       midGamma: 8,
+      timestamp: 9,
     };
   }
 
