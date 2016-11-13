@@ -53,10 +53,13 @@ The LED light needs to be configured to be in slave mode.
 The Enttec light controller networking is configured to 10.7.153.129.  Make sure the computer's networking settings are such that it can communicate with this IP.
 
 ## Troubleshooting
+
 #### Lighting daemon will not start
 Check the settings file to make sure it is binding to the correct network address (and that the interface exists/has the right IP address).
+
 #### Light is cycling colors (through the entire spectrum)
 The light is in the wrong mode.  Press both interface buttons at the same time to cycle to the next mode.  Repeat until it reads a 3 digit number
+
 #### Light is not on
 * Check the light plugged in and turned on.
 * Check the light is in slave mode (3 digits on the display)
@@ -69,8 +72,10 @@ The light is in the wrong mode.  Press both interface buttons at the same time t
     * Try pinging the network address 10.7.153.129 to verify the Enttec box can be reached.
 * Check the service output to make sure that the service is receiving headset data
     * If data is not being received, check the network settings between the headset source and the computer hosting the lighting service
+
 #### Light is glowing white (and you want it to change colors)
 * The service is in "headset off" mode.  Change the "default_on" setting in the service configuration file to True.
+
 #### Light is bouncing between colors (and you want it to glow white)
 * The service is in "headset on" mode.  Change the "default_on" setting in the service configuration file to False.
 
