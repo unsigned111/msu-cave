@@ -69,10 +69,6 @@ func main() {
 
 		msg := osc.NewMessage("/eeg")
 		for value := range record {
-			// skip the time stamp
-			if value == 0 {
-				continue
-			}
 			i, err := strconv.Atoi(record[value])
 			check(err)
 			msg.Append(int32(i))

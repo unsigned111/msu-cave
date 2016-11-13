@@ -16,38 +16,41 @@ import (
 var DEFAULT_LOG_FILE_NAME string = ""
 
 const (
-	DELTA = iota
-	THETA
-	LO_ALPHA
+	TIMESTAMP = iota
+	DELTA
 	HI_ALPHA
-	LO_BETA
 	HI_BETA
+	LO_ALPHA
+	LO_BETA
 	LO_GAMMA
 	MID_GAMMA
+	THETA
 	N_PARAMS
 )
 
 var nameMap = map[int]string{
+	TIMESTAMP: "timestamp",
 	DELTA:     "delta",
-	THETA:     "theta",
-	LO_ALPHA:  "loAlpha",
 	HI_ALPHA:  "hiAlpha",
-	LO_BETA:   "loBeta",
 	HI_BETA:   "hiBeta",
+	LO_ALPHA:  "loAlpha",
+	LO_BETA:   "loBeta",
 	LO_GAMMA:  "loGamma",
 	MID_GAMMA: "midGamma",
+	THETA:     "theta",
 }
 
 func eegRawData(eeg neurosky.EEG) map[string]int {
 	return map[string]int{
+		nameMap[TIMESTAMP]: int(time.Now().Unix()),
 		nameMap[DELTA]:     eeg.Delta,
-		nameMap[THETA]:     eeg.Theta,
-		nameMap[LO_ALPHA]:  eeg.LoAlpha,
 		nameMap[HI_ALPHA]:  eeg.HiAlpha,
-		nameMap[LO_BETA]:   eeg.LoBeta,
 		nameMap[HI_BETA]:   eeg.HiBeta,
+		nameMap[LO_ALPHA]:  eeg.LoAlpha,
+		nameMap[LO_BETA]:   eeg.LoBeta,
 		nameMap[LO_GAMMA]:  eeg.LoGamma,
 		nameMap[MID_GAMMA]: eeg.MidGamma,
+		nameMap[THETA]:     eeg.Theta,
 	}
 }
 
@@ -75,24 +78,26 @@ func sendData(eeg neurosky.EEG, url string) {
 	}
 }
 
+func format(i int, base string) string {
+	var format_str = base
+	if i < N_PARAMS-1 {
+		format_str += ","
+	}
+	return format_str
+}
+
 func logHeader(logFile *os.File) {
-	// note that if the timestamp is no longer first update the logData method
-	fmt.Fprintf(logFile, "timestamp")
 	for i := 0; i < N_PARAMS; i++ {
-		fmt.Fprintf(logFile, ",%s", nameMap[i])
+		fmt.Fprintf(logFile, format(i, "%s"), nameMap[i])
 	}
 	fmt.Fprintf(logFile, "\n")
 }
 
 func logData(eeg neurosky.EEG, logFile *os.File) {
-	// note that if the timestamp is no longer first update the logHeader
-	timestamp := int32(time.Now().Unix())
-	fmt.Fprintf(logFile, "%d", timestamp)
-
 	payload := eegRawData(eeg)
 	for i := 0; i < N_PARAMS; i++ {
 		key := nameMap[i]
-		fmt.Fprintf(logFile, ",%d", payload[key])
+		fmt.Fprintf(logFile, format(i, "%d"), payload[key])
 	}
 	fmt.Fprintf(logFile, "\n")
 }
@@ -104,13 +109,13 @@ func makeRobot(device string, url string, logFile *os.File) *gobot.Robot {
 		gobot.On(neuro.Event("eeg"), func(data interface{}) {
 			eeg := data.(neurosky.EEG)
 			fmt.Println("Delta", eeg.Delta)
-			fmt.Println("Theta", eeg.Theta)
-			fmt.Println("LoAlpha", eeg.LoAlpha)
 			fmt.Println("HiAlpha", eeg.HiAlpha)
-			fmt.Println("LoBeta", eeg.LoBeta)
 			fmt.Println("HiBeta", eeg.HiBeta)
+			fmt.Println("LoAlpha", eeg.LoAlpha)
+			fmt.Println("LoBeta", eeg.LoBeta)
 			fmt.Println("LoGamma", eeg.LoGamma)
 			fmt.Println("MidGamma", eeg.MidGamma)
+			fmt.Println("Theta", eeg.Theta)
 			fmt.Println("\n")
 			sendData(eeg, url)
 			logData(eeg, logFile)
