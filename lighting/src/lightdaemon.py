@@ -111,9 +111,6 @@ class CaveListener(object):
         self.channel_id = config["channel_id"]
         self.scaler = config["scaler"]
 
-        #for i in self.color_gen.get_headset_trans():
-        #    self.controller.message_queue.put(i)
-
     def run(self):
         self.server.serve_forever()
 
@@ -147,10 +144,9 @@ class CaveListener(object):
 
     @staticmethod
     def scale(value, scaler):
-        print value
         scaled = value / float(scaler)
-        print scaled
         return scaled
+
 
 class Pulser(object):
     def __init__(self, controller, color_gen):

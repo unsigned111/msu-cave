@@ -1,9 +1,8 @@
 {
-    #"listen_ip": "153.90.59.117",
-    #"listen_ip": "192.168.1.109",
+    # Incoming and outgoing network settings
     "listen_ip": "127.0.0.1",
-    "listen_port": 57121,
-    "controller_ip": "10.7.153.129",
+    "listen_port": 7770,
+    "controller_ip": "10.7.153.129",      # IP of the Artnet controller
     "lighting_configuration": "./config/rigs/pod-rig.yaml",
     "min_intensity": 255,
     "max_intensity": 255,
@@ -14,7 +13,7 @@
     },
     "end_color": {
       "red": 0,
-      "green": 0,
+      "green": 255,
       "blue": 255,
     },
     "headsetoff_color": {
@@ -26,8 +25,22 @@
     "pulse_amount": 3.0,
     "pulse_length": 4,
     "pulse_pause": 4,
-    "color_granularity": 10,
-    "default_on": False,
-    "channel_id": 3,
-    "scaler": 17000000,
+    "color_granularity": 10,  # number of messages to generate for a transition
+
+    # switch between headset on/off - true: headset on
+    # for demo, set default_on to False to make the pod pulse
+    # set default_on to True to make the pod use incoming eeg messages
+    "default_on": True,
+
+    # 0 - timestamp
+    # 1 - delta
+    # 2 - high alpha
+    # 3 - high beta
+    # 4 - lo alpha
+    # 5 - lo beta
+    # 6 - lo gamma
+    # 7 - mid gamma
+    # 8 - theta
+    "channel_id": 4,          # EEG channel to listen to
+    "scaler": 17000000,       # number to scale EEG values by
 }
