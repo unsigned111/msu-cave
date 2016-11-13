@@ -2,6 +2,7 @@
 'use strict';
 
 var yargs = require('yargs');
+var osc = require('node-osc');
 
 var broadcaster = require('./broadcaster');
 var server = require('./server');
@@ -54,10 +55,31 @@ function onRemoteData(snapshot) {
 }
 firebaseBroadcaster.subscribe(onRemoteData);
 
+var clients = [
+  new osc.Client('127.0.0.1', 57121), // osc sink
+  new osc.Client('153.90.57.133', 7770), // lighting
+  new osc.Client('127.0.0.1', 7770), // sound
+];
+
 // setup the server so that everything it receives some new data it is
 // published to the remote data server.
 function onLocalData(body) {
   firebaseBroadcaster.publish(body);
+
+  // Send an OSC message
+  var data = [
+    body.timestamp,
+    body.delta,
+    body.hiAlpha,
+    body.hiBeta,
+    body.loAlpha,
+    body.loBeta,
+    body.loGamma,
+    body.midGamma,
+    body.theta
+  ];
+  console.log(data);
+  clients.forEach(function(client) { client.send("/eeg", data); });
 }
 var server = new server.Server(argv.port, onLocalData);
 server.start();

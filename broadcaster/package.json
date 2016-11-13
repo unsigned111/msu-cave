@@ -12,6 +12,7 @@
   "dependencies": {
     "body": "5.1.0",
     "firebase": "3.2.0",
+    "node-osc": "^2.0.3",
     "payload-validator": "1.0.4",
     "yargs": "4.8.1"
   },
