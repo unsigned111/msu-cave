@@ -21,6 +21,9 @@ run: headset_bridge
 headset_bridge: pkg headset_bridge.go
 	go build -o headset_bridge
 
+headset_bridge.arm: pkg headset_bridge.go
+	env GOOS=linux GOARCH=arm go build -o headset_bridge.arm
+
 # depend is just an alias for pkg.
 depend: pkg
 

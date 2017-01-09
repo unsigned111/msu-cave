@@ -21,6 +21,9 @@ run: osc_src
 osc_src: pkg osc_src.go
 	go build -o osc_src
 
+osc_src.arm: pkg osc_src.go
+	env GOOS=linux GOARCH=arm go build -o osc_src.arm
+
 # depend is just an alias for pkg.
 depend: pkg
 
