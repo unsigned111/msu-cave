@@ -3,6 +3,7 @@
 
 var yargs = require('yargs');
 var osc = require('node-osc');
+var fs = require('fs');
 
 var broadcaster = require('./broadcaster');
 var server = require('./server');
@@ -30,6 +31,15 @@ var argv = yargs
   .demand('e')
   .alias('e', 'eeg-headset-id')
   .describe('e', 'The eeg headset id')
+  //log file
+  .default('l', '')
+  .alias('l', 'log-file-name')
+  .describe('l', 'The logfile name')
+  //osc clients
+  .default('o', [])
+  .alias('o', 'osc-servers')
+  .describe('o', 'the osc servers to send osc data')
+  .array('o')
   // help
   .help('h')
   .alias('h', 'help')
@@ -55,11 +65,11 @@ function onRemoteData(snapshot) {
 }
 firebaseBroadcaster.subscribe(onRemoteData);
 
-var clients = [
-  new osc.Client('127.0.0.1', 57121), // osc sink
-  new osc.Client('153.90.57.133', 7770), // lighting
-  new osc.Client('127.0.0.1', 7770), // sound
-];
+// setup the osc clients
+var clients = argv.oscServers.map(function(rawClientAddress) {
+  let clientAddress = rawClientAddress.split(':');
+  return new osc.Client(clientAddress[0], clientAddress[1]);
+});
 
 // setup the server so that everything it receives some new data it is
 // published to the remote data server.
@@ -79,6 +89,12 @@ function onLocalData(body) {
     body.theta
   ];
   console.log(data);
+
+  let logFileName = argv.logFileName;
+  if (logFileName) {
+    fs.appendFile(logFileName, [body.timestamp].concat(data) + "\n");
+  }
+
   clients.forEach(function(client) { client.send("/eeg", data); });
 }
 var server = new server.Server(argv.port, onLocalData);
