@@ -3,6 +3,7 @@
 
 var yargs = require('yargs');
 var osc = require('node-osc');
+var fs = require('fs');
 
 var broadcaster = require('./broadcaster');
 var server = require('./server');
@@ -30,6 +31,10 @@ var argv = yargs
   .demand('e')
   .alias('e', 'eeg-headset-id')
   .describe('e', 'The eeg headset id')
+  //log file
+  .default('l', '')
+  .alias('l', 'log-file-name')
+  .describe('l', 'The logfile name')
   //osc clients
   .default('o', [])
   .alias('o', 'osc-servers')
@@ -84,6 +89,12 @@ function onLocalData(body) {
     body.theta
   ];
   console.log(data);
+
+  let logFileName = argv.logFileName;
+  if (logFileName) {
+    fs.appendFile(logFileName, [body.timestamp].concat(data) + "\n");
+  }
+
   clients.forEach(function(client) { client.send("/eeg", data); });
 }
 var server = new server.Server(argv.port, onLocalData);
