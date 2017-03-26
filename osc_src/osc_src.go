@@ -13,8 +13,9 @@ import (
 )
 
 type AppArgs struct {
-	ReplayFileName string
-	Port           int
+	ReplayFileName  string
+	Port            int
+        Delay           int
 }
 
 func parseArgs() AppArgs {
@@ -28,15 +29,22 @@ func parseArgs() AppArgs {
 		7770,
 		"Port to send data",
 	)
+        delay := flag.Int(
+                "d",
+                1,
+                "Delay between messages",
+        )
 	flag.Parse()
 
 	args := AppArgs{
 		ReplayFileName: *fileName,
 		Port:           *port,
+                Delay:          *delay,
 	}
 
 	fmt.Println("Reading from:", args.ReplayFileName)
 	fmt.Println("Destination Port:", args.Port)
+        fmt.Println("Delay:", args.Delay)
 	return args
 }
 
@@ -74,6 +82,6 @@ func main() {
 			msg.Append(int32(i))
 		}
 		client.Send(msg)
-		time.Sleep(1 * time.Second)
+		time.Sleep(time.Duration(args.Delay) * time.Second)
 	}
 }
