@@ -1,10 +1,10 @@
 #!/bin/bash
 export CONFIGPATH=/etc/lighting
-export INSTALLPATH=/usr/bin/lighting
+export INSTALLPATH=/usr/bin
 export SERVICEPATH=/etc/systemd/system
 
 mkdir $CONFIGPATH
-cp ./config.json $CONFIGPATH/config.json
+cp ./settings.json $CONFIGPATH/settings.json
 cp ./lighting.arm $INSTALLPATH/lighting
 cp ./lighting.service $SERVICEPATH/lighting.service
 
