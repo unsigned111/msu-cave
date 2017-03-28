@@ -1,41 +1,53 @@
 # Daemon for Cave lighting controller
-## Package Requirements:
-    * Ubuntu/Debian packages:
-        * python 2.7.*
-        * libncurses5
-        * python-dev
-        * virtualenv (2.7.*)
-    * PIP requirements can be found in requirements.txt
+## Building Requirements:
+    * GoLang compiler
+
+## Building the bundled application
+The following make commands can be run to do various project tools:
+
+* Create a redistributable Arm executable bundle
+```shell
+make bundle
+```
+* Create an x86 binary
+```shell
+make all
+```
+* Run the unit tests
+```shell
+make test
+```
+* Create an Arm binary
+```shell
+make arm
+```
+* Run code analysis tools
+```shell
+make check
+```
+
 
 ## How to setup the running environment:
-####1. Makes sure you have libncurses5, python 2.7, etc installed.
-On OS 10.10+ these are already installed.
-On ubuntu/debian install these packages with apt.
+####1. Generate an arm executable bundle
 ```shell
-apt-get install python-dev libncurses5 virtualenv
+make bundle
 ```
 
-####2. Create and switch to the virtual environment.
+####2. Run the installation script.
 ```shell
-cd project directory
-virtualenv env
-source env/bin/activate
+./install.sh
 ````
-####3. Install the necessary PIP package requirements.
-```shell
-pip install -r ./requirements.txt
-```
+This installer copies the lighting executable into the /usr/sbin directory.  It also creates a configuration directory in /etc and copies the base configuration to that directory.  Finally, it installs a systemd service file and enables the service.
 
 ## Configuring the daemon:
-Settings for the daemon can be altered by editing the `config.yaml` file located at `src/config/config.yaml` in the project directory.
+Settings for the daemon can be altered by editing the `/etc/lighting/config.json` file located in the project directory.
 
 If you change the configuration while the service is running, the service must be restarted before the settings will be used.
 
 ## Running the daemon:
 Execute the `lightdaemon.py` script from the command line.
 ```shell
-cd src
-python lightdaemon.py
+./lighting -f settings.json -d
 ```
 
 ## Equipment requirements
@@ -74,10 +86,10 @@ The light is in the wrong mode.  Press both interface buttons at the same time t
     * If data is not being received, check the network settings between the headset source and the computer hosting the lighting service
 
 #### Light is glowing white (and you want it to change colors)
-* The service is in "headset off" mode.  Change the "default_on" setting in the service configuration file to True.
+* The service is in "headset off" mode.  Change the "DefaultOn" setting in the service configuration file to True.
 
 #### Light is bouncing between colors (and you want it to glow white)
-* The service is in "headset on" mode.  Change the "default_on" setting in the service configuration file to False.
+* The service is in "headset on" mode.  Change the "DefaultOn" setting in the service configuration file to False.
 
 ## Presentation notes
 The service listens to a single channel of eeg data (configurable).  The intensity of this channel is mapped to a linear gradient between two colors (also configurable).

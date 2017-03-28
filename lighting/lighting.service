@@ -1,0 +1,19 @@
+[Unit]
+Description=Lighting Service
+After=multi-user.target
+
+[Service]
+ExecStart=/usr/bin/lighting.arm -f "/etc/lighting/settings.json"
+StandardOutput=journal+console
+Nice=-15
+IOSchedulingClass=best-effort
+IOSchedulingPriority=0
+CPUSchedulingPolicy=rr
+CPUSchedulingPriority=90
+
+[Install]
+WantedBy=multi-user.target
+Alias=lighting.service
+
+[Journal]
+Storage=persistent
