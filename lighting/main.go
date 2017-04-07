@@ -23,6 +23,7 @@ func main() {
 	initLighting()
 	go artnetSend()
 	go idleLighting()
+	go toggleHeadset()
 	oscListen()
 }
 
@@ -57,7 +58,6 @@ func oscListen() {
 		headsetLock.Lock()
 		headsetOn = msg.Arguments[0].(bool)
 		headsetLock.Unlock()
-		go idleLighting()
 	})
 	server.ListenAndServe()
 }
@@ -159,6 +159,19 @@ func idleLighting() {
 		queueColors(rampDown)
 		lastColor = settings.OffStartColor
 		time.Sleep(pauseDuration)
+	}
+}
+
+func toggleHeadset() {
+	for {
+		headsetLock.Lock()
+		headsetOn = true
+		headsetLock.Unlock()
+		time.Sleep(time.Duration(60))
+		headsetLock.Lock()
+		headsetOn = false
+		headsetLock.Unlock()
+		time.Sleep(time.Duration(30))
 	}
 }
 
