@@ -9,8 +9,8 @@ ifneq (${REL_PWD}, ./)
 endif
 
 # setup the go path
-export GOPATH=${PWD}/../
-export GOBIN=${PWD}/../bin/
+export GOPATH=${PWD}
+export GOBIN=${PWD}/bin/
 
 all: lighting
 

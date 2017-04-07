@@ -24,3 +24,5 @@ I wrote the headset bridge program in Go because I could not find a node library
 other than Gobot that was independent of the neruosky drivers.  However, I just
 found the [cyclonejs](https://cylonjs.com/documentation/platforms/neurosky/)
 project.  This may allow us to remove the headset bridge all together.
+
+this is new
