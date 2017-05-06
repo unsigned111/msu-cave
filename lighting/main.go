@@ -150,14 +150,16 @@ func activeLighting(value int) {
 func idleLighting() {
 	halfPulseLength := settings.FPS * (settings.PulseLength >> 1)
 	pauseDuration := time.Duration(settings.PulsePause)
-	for !readHeadsetState() {
-		// calculate the number of messages to send using the FPS and the Pulse Length from settings
-		rampUp := settings.OffStartColor.Interpolate(settings.OffEndColor, halfPulseLength)
-		queueColors(rampUp)
-		rampDown := settings.OffEndColor.Interpolate(settings.OffStartColor, halfPulseLength)
-		queueColors(rampDown)
-		lastColor = settings.OffStartColor
-		time.Sleep(pauseDuration)
+	for {
+		if !readHeadsetState() {
+			// calculate the number of messages to send using the FPS and the Pulse Length from settings
+			rampUp := settings.OffStartColor.Interpolate(settings.OffEndColor, halfPulseLength)
+			queueColors(rampUp)
+			rampDown := settings.OffEndColor.Interpolate(settings.OffStartColor, halfPulseLength)
+			queueColors(rampDown)
+			lastColor = settings.OffStartColor
+			time.Sleep(pauseDuration)
+		}
 	}
 }
 
