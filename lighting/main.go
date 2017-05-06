@@ -23,7 +23,6 @@ func main() {
 	initLighting()
 	go artnetSend()
 	go idleLighting()
-	go toggleHeadset()
 	oscListen()
 }
 
@@ -160,24 +159,6 @@ func idleLighting() {
 		lastColor = settings.OffStartColor
 		time.Sleep(pauseDuration)
 	}
-}
-
-func toggleHeadset() {
-	for {
-		headsetLock.Lock()
-		headsetOn = true
-		headsetLock.Unlock()
-		time.Sleep(time.Duration(60))
-		headsetLock.Lock()
-		headsetOn = false
-		headsetLock.Unlock()
-		time.Sleep(time.Duration(30))
-	}
-}
-
-func specifyLighting(red, green, blue, white, intensity int) {
-	color := LightingColor{red, green, blue, white, intensity}
-	queueColor(color)
 }
 
 // Initializes the lighting system.
