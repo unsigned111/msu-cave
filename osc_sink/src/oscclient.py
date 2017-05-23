@@ -9,10 +9,11 @@ from pythonosc import udp_client
 
 def send_message():
     msg = osc_message_builder.OscMessageBuilder(address="/eeg")
-    msg.add_arg(random.random())
+    val = random.randint(0, 1023)
+    msg.add_arg(val)
     msg = msg.build()
     client.send(msg)
-    print("Sending a message!")
+    print("Sending a message! " + str(val))
 
 
 if __name__ == "__main__":
