@@ -14,6 +14,7 @@ gihandle OSCinit 7770
 ;ga1 init 0
 
 instr 1
+    kCount init 0
 	kf1 init 0
 	kf2 init 0
 	kf3 init 0
@@ -22,12 +23,13 @@ instr 1
 	kf6 init 0
 	kf7 init 0
 	kf8 init 0
-	kCount init 0
+	;kf9 init 0
 
 	ibasefreq = p4
 	iscale = p5
 	ifn = p6
 	idelbase = p7
+nxtmsg:
 
  	kk OSClisten gihandle, "/eeg", "iiiiiiiii", kCount, kf1, kf2, kf3, kf4, kf5, kf6, kf7, kf8
 
@@ -128,10 +130,8 @@ f3 0 16384 9 0.5 1 0
 
 
 ;these two
-;i1 .8  3000     36         .7   1  .01   .85
-i1 .8  3000     600         .7   1  .01   .85
-;i1 .39 3000     239.4432   .5   1   .002   .15
-i1 .39 3000     1200   .5   1   .002   .15
+i1 .8  3000     36         .7   1  .01   .85
+i1 .39 3000     239.4432   .5   1   .002   .15
 
 
 
