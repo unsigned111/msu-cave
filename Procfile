@@ -1,3 +1,6 @@
+pairing:
+    cd util/pair_headset
+    ./pairing_util.sh
 headset_bridge:
     cd headset_bridge
     ./headset_bridge
@@ -11,6 +14,3 @@ sound:
 lighting:
     cd lighting
     ./lighting -f settings.json -d
-Pairing:
-    cd util/pair_headset
-    ./pairing_util.sh
