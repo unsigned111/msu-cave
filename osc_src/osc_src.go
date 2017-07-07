@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"time"
 	"strings"
+	"math/rand"
 
 	"github.com/hypebeast/go-osc/osc"
 )
@@ -18,6 +19,7 @@ type AppArgs struct {
 	Port			int
 	Delay		   	int
 	Toggle			bool
+	Similarity		bool
 }
 
 func parseArgs() AppArgs {
@@ -38,8 +40,13 @@ func parseArgs() AppArgs {
 	)
 	toggle := flag.Bool(
 		"t",
-		true,
-		"Toggle headset on/off enabled",
+		false,
+		"Toggle headset on/off simulation",
+	)
+	similarity := flag.Bool(
+		"s",
+		false,
+		"Toggle similarity simulation",
 	)
 	flag.Parse()
 
@@ -48,6 +55,7 @@ func parseArgs() AppArgs {
 		Port:		*port,
 		Delay:		*delay,
 		Toggle:		*toggle,
+		Similarity:	*similarity,
 	}
 
 	fmt.Println("Reading from:", args.ReplayFileName)
@@ -72,7 +80,13 @@ func main() {
 
 	client := osc.NewClient("localhost", args.Port)
 	go eegSender()
-	go toggleSender()
+	if args.Toggle {
+		go toggleSender()
+	}
+	
+	if args.Similarity {
+		go similaritySender()
+	}
 
 	for {
 		client.Send(<-messageChannel)
@@ -103,7 +117,7 @@ func eegSender() {
 			msg.Append(int32(i))
 		}
 		messageChannel <- msg
-		fmt.Println(endpoint, ":\t", strings.Join(record, " "))
+		fmt.Println(endpoint, ":\t\t", strings.Join(record, " "))
 		time.Sleep(time.Duration(args.Delay) * time.Second)
 	}
 }
@@ -124,5 +138,17 @@ func toggleSender() {
 		onoff = !onoff
 		fmt.Println(endpoint, ":\t", value)
 		time.Sleep(time.Duration(args.Delay * 10) * time.Second)
+	}
+}
+
+func similaritySender() {
+	endpoint := "/similarity"
+	for {
+		msg := osc.NewMessage(endpoint)
+		value := rand.Float64()
+		msg.Append(value)
+		messageChannel <- msg
+		fmt.Println(endpoint, ":\t", value)
+		time.Sleep(time.Duration(args.Delay * 5) * time.Second)
 	}
 }
