@@ -18,6 +18,9 @@ all: headset_bridge
 run: headset_bridge
 	./headset_bridge
 
+test:
+	go test
+
 headset_bridge: pkg headset_bridge.go
 	go build -o headset_bridge
 
@@ -34,6 +37,7 @@ pkg:
 	go get -d -u github.com/hybridgroup/gobot/...
 	go install github.com/hybridgroup/gobot/platforms/neurosky
 	go get github.com/parnurzeal/gorequest
+	go get github.com/stretchr/testify/assert
 
 # standard go clean
 clean:
