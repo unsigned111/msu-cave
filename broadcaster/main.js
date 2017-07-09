@@ -2,7 +2,6 @@
 'use strict';
 
 var yargs = require('yargs');
-var osc = require('node-osc');
 var fs = require('fs');
 
 var broadcaster = require('./broadcaster');
@@ -41,6 +40,11 @@ var argv = yargs
   .alias('h', 'help')
   .argv;
 
+// setup the osc clients. The osc broadcaser hands the heavy lifting
+// of sending the data over to the OSC clients
+const clients = argv.oscServers.map(broadcaster.oscClient);
+const oscBroadcaster = new broadcaster.OSCBroadcaster(clients);
+
 // create and initialize the broadcaster object.  The broadcaster handles
 // much of the heavy lifting for communicating updates on the node to
 // the firebase serer
@@ -61,36 +65,12 @@ function onRemoteData(snapshot) {
 }
 firebaseBroadcaster.subscribe(onRemoteData);
 
-// setup the osc clients
-var clients = argv.oscServers.map(function(rawClientAddress) {
-  let clientAddress = rawClientAddress.split(':');
-  return new osc.Client(clientAddress[0], clientAddress[1]);
-});
-
 // setup the server so that everything it receives some new data it is
 // published to the remote data server.
 function onLocalData(body) {
   console.log(body)
   firebaseBroadcaster.publish(body);
-
-  // Send an eeg OSC message
-  const eegData = [
-    body.timestamp,
-    body.delta,
-    body.hiAlpha,
-    body.hiBeta,
-    body.loAlpha,
-    body.loBeta,
-    body.loGamma,
-    body.midGamma,
-    body.theta,
-  ];
-  clients.forEach(function(client) { client.send("/eeg", eegData); });
-
-  const onOffData = [
-    body.headsetOn ? 1 : 0,
-  ]
-  clients.forEach(function(client) { client.send("/onoff", onOffData); });
+  oscBroadcaster.publish(body);
 }
 const webServer = new server.Server(argv.port, onLocalData);
 webServer.start();
