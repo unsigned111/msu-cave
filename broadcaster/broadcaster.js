@@ -11,7 +11,7 @@ function firebaseDB(credentials, url) {
   return firebase.database();
 }
 
-class Broadcaster {
+class FirebaseBroadcaster {
   constructor(database, installationID, headsetID) {
     this.db = database;
     this.installationID = installationID;
@@ -44,6 +44,6 @@ class Broadcaster {
   }
 }
 
-module.exports.firebaseDB = firebaseDB;
-module.exports.Broadcaster = Broadcaster;
 
+module.exports.firebaseDB = firebaseDB;
+module.exports.FirebaseBroadcaster = FirebaseBroadcaster;

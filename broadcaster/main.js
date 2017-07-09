@@ -44,8 +44,8 @@ var argv = yargs
 // create and initialize the broadcaster object.  The broadcaster handles
 // much of the heavy lifting for communicating updates on the node to
 // the firebase serer
-let db = new broadcaster.firebaseDB(argv.credentials, argv.firebase_url);
-let firebaseBroadcaster = new broadcaster.Broadcaster(
+const db = new broadcaster.firebaseDB(argv.credentials, argv.firebase_url);
+const firebaseBroadcaster = new broadcaster.FirebaseBroadcaster(
   db, argv.installationId, argv.eegHeadsetId
 );
 
