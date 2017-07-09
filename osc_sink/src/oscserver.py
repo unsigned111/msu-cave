@@ -4,8 +4,10 @@ from pythonosc import dispatcher
 from pythonosc import osc_server
 
 
-def print_handler(unused_addr, args, *vals):
-    print("[{0}] ~ {1}".format(args[0], vals))
+def make_print_handler(path):
+    def print_handler(unused_addr, args, *vals):
+        print(path + " [{0}] ~ {1}".format(args[0], vals))
+    return print_handler
 
 
 if __name__ == "__main__":
@@ -17,7 +19,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     dispatcher = dispatcher.Dispatcher()
-    dispatcher.map("/eeg", print_handler, "debug")
+    dispatcher.map("/eeg", make_print_handler("eeg: "), "debug")
+    dispatcher.map("/onoff", make_print_handler("onoff: "), "debug")
 
     server = osc_server.ThreadingOSCUDPServer((args.ip, args.port), dispatcher)
     print("Serving on {}".format(server.server_address))
