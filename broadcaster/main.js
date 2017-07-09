@@ -61,7 +61,6 @@ function onRemoteData(snapshot) {
   // in your code or call your service.  If you are going to call your
   // service, I recommend using the requests module
   // https://github.com/request/request
-  // console.log(snapshot.val());
 }
 firebaseBroadcaster.subscribe(onRemoteData);
 
