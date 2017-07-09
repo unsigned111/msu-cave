@@ -11,7 +11,6 @@ func MakeOnOffModel(threashold float64, numSamples int) OnOffModel {
 	for i, _ := range samples {
 		samples[i] = 255
 	}
-
 	return OnOffModel{
 		Threashold: threashold,
 		Samples:    samples,
@@ -34,6 +33,6 @@ func (m OnOffModel) isOn() bool {
 	for _, val := range m.Samples {
 		agg += float64(val) / 255.0
 	}
-	avgSignal := agg / float64(m.NumSamples())
-	return avgSignal < m.Threashold
+	avg := agg / float64(m.NumSamples())
+	return avg < m.Threashold
 }
