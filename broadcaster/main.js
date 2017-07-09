@@ -56,7 +56,7 @@ const firebaseBroadcaster = new broadcaster.FirebaseBroadcaster(
 // initialize so that every time remote data is updated the onRemoteData
 // method is called.  This should hook into the covariance calculator either
 // by sending a message to the covariance sevice or calling directly.
-function onRemoteData(snapshot) {
+const onRemoteData = (snapshot) => {
   // NOTE:DLM: whoever is doing the covariance, this is where you can hook
   // in your code or call your service.  If you are going to call your
   // service, I recommend using the requests module
@@ -66,7 +66,7 @@ firebaseBroadcaster.subscribe(onRemoteData);
 
 // setup the server so that everything it receives some new data it is
 // published to the remote data server.
-function onLocalData(body) {
+const onLocalData = (body) => {
   console.log(body)
   firebaseBroadcaster.publish(body);
   oscBroadcaster.publish(body);
