@@ -1,13 +1,11 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
 	"github.com/parnurzeal/gorequest"
 	"os"
 	"os/signal"
-	"time"
 
 	"github.com/hybridgroup/gobot"
 	"github.com/hybridgroup/gobot/platforms/neurosky"
@@ -15,55 +13,11 @@ import (
 
 var DEFAULT_LOG_FILE_NAME string = ""
 
-const (
-	TIMESTAMP = iota
-	DELTA
-	HI_ALPHA
-	HI_BETA
-	LO_ALPHA
-	LO_BETA
-	LO_GAMMA
-	MID_GAMMA
-	THETA
-	N_PARAMS
-)
+const ON_OFF_THREASHOLD = .5
+const ON_OFF_WINDOW_SIZE = 3
 
-var nameMap = map[int]string{
-	TIMESTAMP: "timestamp",
-	DELTA:     "delta",
-	HI_ALPHA:  "hiAlpha",
-	HI_BETA:   "hiBeta",
-	LO_ALPHA:  "loAlpha",
-	LO_BETA:   "loBeta",
-	LO_GAMMA:  "loGamma",
-	MID_GAMMA: "midGamma",
-	THETA:     "theta",
-}
-
-func eegRawData(eeg neurosky.EEG) map[string]int {
-	return map[string]int{
-		nameMap[TIMESTAMP]: int(time.Now().Unix()),
-		nameMap[DELTA]:     eeg.Delta,
-		nameMap[HI_ALPHA]:  eeg.HiAlpha,
-		nameMap[HI_BETA]:   eeg.HiBeta,
-		nameMap[LO_ALPHA]:  eeg.LoAlpha,
-		nameMap[LO_BETA]:   eeg.LoBeta,
-		nameMap[LO_GAMMA]:  eeg.LoGamma,
-		nameMap[MID_GAMMA]: eeg.MidGamma,
-		nameMap[THETA]:     eeg.Theta,
-	}
-}
-
-func eegToPayload(eeg neurosky.EEG) string {
-	eegRawData := eegRawData(eeg)
-	eegData, _ := json.Marshal(eegRawData)
-	payload := string(eegData)
-	fmt.Println(payload)
-	return payload
-}
-
-func sendData(eeg neurosky.EEG, url string) {
-	payload := eegToPayload(eeg)
+func sendData(state State, url string) {
+	payload := state.AsPayload()
 	request := gorequest.New()
 	response, body, errors := request.Post(url).
 		Set("Notes", "gorequst is coming!").
@@ -78,47 +32,48 @@ func sendData(eeg neurosky.EEG, url string) {
 	}
 }
 
-func format(i int, base string) string {
-	var format_str = base
-	if i < N_PARAMS-1 {
-		format_str += ","
-	}
-	return format_str
-}
-
 func logHeader(logFile *os.File) {
-	for i := 0; i < N_PARAMS; i++ {
-		fmt.Fprintf(logFile, format(i, "%s"), nameMap[i])
-	}
-	fmt.Fprintf(logFile, "\n")
+	LogHeader(logFile)
 }
 
-func logData(eeg neurosky.EEG, logFile *os.File) {
-	payload := eegRawData(eeg)
-	for i := 0; i < N_PARAMS; i++ {
-		key := nameMap[i]
-		fmt.Fprintf(logFile, format(i, "%d"), payload[key])
-	}
-	fmt.Fprintf(logFile, "\n")
+func logData(state State, logFile *os.File) {
+	state.LogData(logFile)
 }
 
 func makeRobot(device string, url string, logFile *os.File) *gobot.Robot {
 	adaptor := neurosky.NewNeuroskyAdaptor("neurosky", device)
 	neuro := neurosky.NewNeuroskyDriver(adaptor, "neuro")
+
+	eegChan := make(chan neurosky.EEG)
+	headsetOnChan := make(chan bool)
+
+	state := State{}
+	aggregateor := func() {
+		for {
+			select {
+			case eeg := <-eegChan:
+				state.UpdateEEG(eeg)
+			case headsetOn := <-headsetOnChan:
+				state.TestUpdateHeadsetOn(headsetOn)
+			}
+			sendData(state, url)
+			logData(state, logFile)
+		}
+	}
+	go aggregateor()
+
 	work := func() {
 		gobot.On(neuro.Event("eeg"), func(data interface{}) {
 			eeg := data.(neurosky.EEG)
-			fmt.Println("Delta", eeg.Delta)
-			fmt.Println("HiAlpha", eeg.HiAlpha)
-			fmt.Println("HiBeta", eeg.HiBeta)
-			fmt.Println("LoAlpha", eeg.LoAlpha)
-			fmt.Println("LoBeta", eeg.LoBeta)
-			fmt.Println("LoGamma", eeg.LoGamma)
-			fmt.Println("MidGamma", eeg.MidGamma)
-			fmt.Println("Theta", eeg.Theta)
-			fmt.Println("\n")
-			sendData(eeg, url)
-			logData(eeg, logFile)
+			eegChan <- eeg
+		})
+
+		onOff := MakeOnOffModel(ON_OFF_THREASHOLD, ON_OFF_WINDOW_SIZE)
+		gobot.On(neuro.Event("signal"), func(data interface{}) {
+			sample := data.(uint8)
+			onOff.AddSample(sample)
+			isOn := onOff.isOn()
+			headsetOnChan <- isOn
 		})
 	}
 	robot := gobot.NewRobot(
