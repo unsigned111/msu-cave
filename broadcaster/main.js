@@ -57,7 +57,7 @@ function onRemoteData(snapshot) {
   // in your code or call your service.  If you are going to call your
   // service, I recommend using the requests module
   // https://github.com/request/request
-  console.log(snapshot.val());
+  // console.log(snapshot.val());
 }
 firebaseBroadcaster.subscribe(onRemoteData);
 
@@ -70,10 +70,11 @@ var clients = argv.oscServers.map(function(rawClientAddress) {
 // setup the server so that everything it receives some new data it is
 // published to the remote data server.
 function onLocalData(body) {
+  console.log(body)
   firebaseBroadcaster.publish(body);
 
-  // Send an OSC message
-  var data = [
+  // Send an eeg OSC message
+  const eegData = [
     body.timestamp,
     body.delta,
     body.hiAlpha,
@@ -82,12 +83,14 @@ function onLocalData(body) {
     body.loBeta,
     body.loGamma,
     body.midGamma,
-    body.theta
+    body.theta,
   ];
-  console.log(data);
+  clients.forEach(function(client) { client.send("/eeg", eegData); });
 
-
-  clients.forEach(function(client) { client.send("/eeg", data); });
+  const onOffData = [
+    body.headsetOn ? 1 : 0,
+  ]
+  clients.forEach(function(client) { client.send("/onoff", onOffData); });
 }
 var server = new server.Server(argv.port, onLocalData);
 server.start();
