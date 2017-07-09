@@ -31,10 +31,6 @@ var argv = yargs
   .demand('e')
   .alias('e', 'eeg-headset-id')
   .describe('e', 'The eeg headset id')
-  //log file
-  .default('l', '')
-  .alias('l', 'log-file-name')
-  .describe('l', 'The logfile name')
   //osc clients
   .default('o', [])
   .alias('o', 'osc-servers')
@@ -90,10 +86,6 @@ function onLocalData(body) {
   ];
   console.log(data);
 
-  let logFileName = argv.logFileName;
-  if (logFileName) {
-    fs.appendFile(logFileName, [body.timestamp].concat(data) + "\n");
-  }
 
   clients.forEach(function(client) { client.send("/eeg", data); });
 }
