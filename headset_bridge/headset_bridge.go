@@ -40,27 +40,32 @@ func logData(state State, logFile *os.File) {
 	state.LogData(logFile)
 }
 
-func makeRobot(device string, url string, logFile *os.File) *gobot.Robot {
+func aggregateor(
+	eegChan chan neurosky.EEG,
+	headsetOnChan chan bool,
+	url string,
+	logFile *os.File,
+) {
+	state := State{}
+	for {
+		select {
+		case eeg := <-eegChan:
+			state.UpdateEEG(eeg)
+		case headsetOn := <-headsetOnChan:
+			state.TestUpdateHeadsetOn(headsetOn)
+		}
+		sendData(state, url)
+		logData(state, logFile)
+	}
+}
+
+func makeRobot(
+	device string,
+	eegChan chan neurosky.EEG,
+	headsetOnChan chan bool,
+) *gobot.Robot {
 	adaptor := neurosky.NewNeuroskyAdaptor("neurosky", device)
 	neuro := neurosky.NewNeuroskyDriver(adaptor, "neuro")
-
-	eegChan := make(chan neurosky.EEG)
-	headsetOnChan := make(chan bool)
-
-	state := State{}
-	aggregateor := func() {
-		for {
-			select {
-			case eeg := <-eegChan:
-				state.UpdateEEG(eeg)
-			case headsetOn := <-headsetOnChan:
-				state.TestUpdateHeadsetOn(headsetOn)
-			}
-			sendData(state, url)
-			logData(state, logFile)
-		}
-	}
-	go aggregateor()
 
 	work := func() {
 		gobot.On(neuro.Event("eeg"), func(data interface{}) {
@@ -159,8 +164,15 @@ func main() {
 		defer logFile.Close()
 	}
 
+	// setup the channels
+	eegChan := make(chan neurosky.EEG)
+	headsetOnChan := make(chan bool)
+
+	// init aggregator
+	go aggregateor(eegChan, headsetOnChan, args.Url, logFile)
+
 	// make the robot
-	robot1 := makeRobot(args.Device, args.Url, logFile)
+	robot1 := makeRobot(args.Device, eegChan, headsetOnChan)
 
 	// initialize gobot
 	gbot := gobot.NewGobot()
