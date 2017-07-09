@@ -1,10 +1,10 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/hybridgroup/gobot/platforms/neurosky"
+	"io"
 	"reflect"
 	"time"
 )
@@ -64,33 +64,33 @@ func (s *State) AsPayload() string {
 	return string(data)
 }
 
-func logDelimiter(buffer *bytes.Buffer, numFields int, fieldNum int) {
+func logDelimiter(writer io.Writer, numFields int, fieldNum int) {
 	if fieldNum < numFields-1 {
-		fmt.Fprintf(buffer, ",")
+		fmt.Fprintf(writer, ",")
 	}
 }
 
-func LogHeader(buffer *bytes.Buffer) {
+func LogHeader(writer io.Writer) {
 	s := State{}
 	v := reflect.ValueOf(s)
 	numFields := v.NumField()
 
 	for i := 0; i < numFields; i++ {
 		fieldName := v.Type().Field(i).Name
-		fmt.Fprint(buffer, fieldName)
-		logDelimiter(buffer, numFields, i)
+		fmt.Fprint(writer, fieldName)
+		logDelimiter(writer, numFields, i)
 	}
-	fmt.Fprintln(buffer, "")
+	fmt.Fprintln(writer, "")
 }
 
-func (s *State) LogData(buffer *bytes.Buffer) {
+func (s *State) LogData(writer io.Writer) {
 	v := reflect.ValueOf(*s)
 	numFields := v.NumField()
 
 	for i := 0; i < numFields; i++ {
 		fieldVal := v.Field(i).Interface()
-		fmt.Fprint(buffer, fieldVal)
-		logDelimiter(buffer, numFields, i)
+		fmt.Fprint(writer, fieldVal)
+		logDelimiter(writer, numFields, i)
 	}
-	fmt.Fprintln(buffer, "")
+	fmt.Fprintln(writer, "")
 }
