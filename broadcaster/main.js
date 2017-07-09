@@ -92,5 +92,5 @@ function onLocalData(body) {
   ]
   clients.forEach(function(client) { client.send("/onoff", onOffData); });
 }
-var server = new server.Server(argv.port, onLocalData);
-server.start();
+const webServer = new server.Server(argv.port, onLocalData);
+webServer.start();
