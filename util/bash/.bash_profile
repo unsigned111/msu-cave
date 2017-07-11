@@ -23,3 +23,5 @@ alias gp="git push -u origin master"
 
 alias ipp="curl ipecho.net/plain; echo;"
 alias ipi="ifconfig | grep \"inet \" | grep -v 127.0.0.1"
+
+alias f="./~/go/bin/forego"
