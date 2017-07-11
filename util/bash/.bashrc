@@ -1,5 +1,5 @@
 #Add golang paths
-export GOPATH=/usr/local/go
+export GOPATH=$HOME/go
 
 
 # ~/.bashrc: executed by bash(1) for non-login shells.
