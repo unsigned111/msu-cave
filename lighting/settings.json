@@ -14,7 +14,7 @@
   "PulseAmount":0.75,
 
   "FPS":10,
-  "DefaultOn":true,
+  "DefaultOn":false,
   "HeadsetChannel":6,
   "Scaler":17500000
 }

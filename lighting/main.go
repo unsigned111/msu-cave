@@ -14,6 +14,8 @@ var lastColor LightingColor
 var settings Settings
 var headsetOn bool
 var headsetLock sync.Mutex
+var similarity float64
+var similarityLock sync.Mutex
 var colorChannel = make(chan LightingColor, 256)
 var debug bool
 
@@ -45,18 +47,20 @@ func oscListen() {
 
 	log.Printf("OSC server starting at : " + addr)
 	log.Printf("OSC listening on : %s (%s)", "/eeg", "EEG channel values")
-	log.Printf("OSC listening on : %s (%s)", "/occupied", "Headset on/off")
+	log.Printf("OSC listening on : %s (%s)", "/onoff", "Headset on/off")
+	log.Printf("OSC listening on : %s (%s)", "/similarity", "Similarity")
 	server.Handle("/eeg", func(msg *osc.Message) {
 		value := msg.Arguments[settings.HeadsetChannel]
-		if readHeadsetState() {
-			value := value.(int32)
-			activeLighting(int(value))
-		}
+		activeLighting(int(value.(int32)))
 	})
-	server.Handle("/occupied", func(msg *osc.Message) {
-		headsetLock.Lock()
-		headsetOn = msg.Arguments[0].(bool)
-		headsetLock.Unlock()
+	server.Handle("/onoff", func(msg *osc.Message) {
+		value := msg.Arguments[0]
+		handleOnOff(int(value.(int32)))
+
+	})
+	server.Handle("/similarity", func(msg *osc.Message) {
+		value := msg.Arguments[0]
+		handleSimilarity(value.(float64))
 	})
 	server.ListenAndServe()
 }
@@ -100,6 +104,24 @@ func artnetSend() {
 			time.Sleep(duration)
 		}
 	}
+}
+
+func handleOnOff(value int) {
+	headsetLock.Lock()
+	if value == 0 {
+		headsetOn = false
+	} else {
+		headsetOn = true
+	}
+	log.Printf("Turning headset listening %t\n", headsetOn)
+	headsetLock.Unlock()
+}
+
+func handleSimilarity(value float64) {
+	similarityLock.Lock()
+	similarity = value
+	log.Printf("RECEIVED SIMILARITY : %f\n", similarity)
+	similarityLock.Unlock()
 }
 
 // Given a specific channel value, generates a collection of lighting
@@ -151,7 +173,7 @@ func idleLighting() {
 	halfPulseLength := settings.FPS * (settings.PulseLength >> 1)
 	pauseDuration := time.Duration(settings.PulsePause)
 	for {
-		if !readHeadsetState() {
+		if !(readHeadsetState()) {
 			// calculate the number of messages to send using the FPS and the Pulse Length from settings
 			rampUp := settings.OffStartColor.Interpolate(settings.OffEndColor, halfPulseLength)
 			queueColors(rampUp)
