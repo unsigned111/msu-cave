@@ -29,8 +29,23 @@ suite('simiarity', function () {
   suite('Signal', function() {
     const makeSample = (time, value) => { return { time, value } };
 
+    suite('#enounghSamples', function() {
+      test('it returns true with enouth samples', function() {
+        const signal = new similarity.Signal(2);
+        signal.addSample(1, 2);
+        signal.addSample(2, 4);
+        assert.equal(true, signal.enoughSamples());
+      });
+
+      test('it returns false with enouth samples', function() {
+        const signal = new similarity.Signal(2);
+        signal.addSample(2, 4);
+        assert.equal(false, signal.enoughSamples());
+      });
+    });
+
     suite('#lastSample', function() {
-      test('returns undefined when no samples', function() {
+      test('it returns undefined when no samples', function() {
         const signal = new similarity.Signal(2);
         assert.equal(undefined, signal.lastSample());
       });

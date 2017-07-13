@@ -42,9 +42,13 @@ class Signal {
     return this.samples[0];
   }
 
+  enoughSamples() {
+    return this.samples.length >= this.windowSize
+  }
+
   eval(time) {
     let value;
-    if (this.samples.length < this.windowSize) {
+    if (!this.enoughSamples()) {
       value = undefined;
     } else if (time <= this.firstSample().time) {
       value = this.firstSample().value;
