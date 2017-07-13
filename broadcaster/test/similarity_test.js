@@ -27,7 +27,7 @@ suite('simiarity', function () {
   });
 
   suite('Signal', function() {
-    const makeSample = (time, value) => { return { time, value } };
+    const makeSample = (time, value) => new similarity.Sample(time, value);
 
     suite('#enounghSamples', function() {
       test('it returns true with enouth samples', function() {
