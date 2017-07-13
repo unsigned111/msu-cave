@@ -81,15 +81,19 @@ class Signal {
     return value
   }
 
-  addSample(time, value) {
+  addSample(time, value, headsetOn) {
     if (this.lastSample() && time < this.lastSample().time) {
       throw "Time must move forward";
     }
 
-    const sample = new Sample(time, value);
-    this.samples.push(sample);
-    if (this.samples.length > this.windowSize) {
-      this.samples.shift();
+    if (headsetOn) {
+      const sample = new Sample(time, value);
+      this.samples.push(sample);
+      if (this.samples.length > this.windowSize) {
+        this.samples.shift();
+      }
+    } else {
+      this.samples = [];
     }
   }
 }

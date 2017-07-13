@@ -24,11 +24,11 @@ suite('simiarity', function () {
   describe('#align', function() {
     test('it returns aligned samples when enough data', function() {
       const signals = [new similarity.Signal(2), new similarity.Signal(3)];
-      signals[0].addSample(1, 4);
-      signals[0].addSample(4, 1);
-      signals[1].addSample(2, 3);
-      signals[1].addSample(4, 6);
-      signals[1].addSample(8, 12);
+      signals[0].addSample(1, 4, true);
+      signals[0].addSample(4, 1, true);
+      signals[1].addSample(2, 3, true);
+      signals[1].addSample(4, 6, true);
+      signals[1].addSample(8, 12, true);
       const [v1, v2] = similarity.align(signals[0], signals[1])
 
       assert.deepEqual([4, 3, 1, 1], v1)
@@ -49,14 +49,14 @@ suite('simiarity', function () {
     suite('#enounghSamples', function() {
       test('it returns true with enouth samples', function() {
         const signal = new similarity.Signal(2);
-        signal.addSample(1, 2);
-        signal.addSample(2, 4);
+        signal.addSample(1, 2, true);
+        signal.addSample(2, 4, true);
         assert.equal(true, signal.enoughSamples());
       });
 
       test('it returns false with enouth samples', function() {
         const signal = new similarity.Signal(2);
-        signal.addSample(2, 4);
+        signal.addSample(2, 4, true);
         assert.equal(false, signal.enoughSamples());
       });
     });
@@ -69,7 +69,7 @@ suite('simiarity', function () {
 
       test('it returns value when present', function() {
         const signal = new similarity.Signal(2);
-        signal.addSample(1, 2);
+        signal.addSample(1, 2, true);
         assert.deepEqual(makeSample(1,2), signal.lastSample());
       });
     });
@@ -77,8 +77,8 @@ suite('simiarity', function () {
     suite('#times', function() {
       test('it returns times', function() {
         const signal = new similarity.Signal(2);
-        signal.addSample(1, 2);
-        signal.addSample(3, 5);
+        signal.addSample(1, 2, true);
+        signal.addSample(3, 5, true);
         assert.deepEqual([1,3], signal.times());
       });
 
@@ -88,21 +88,31 @@ suite('simiarity', function () {
       test('maintins circular list', function() {
         const signal = new similarity.Signal(3);
 
-        signal.addSample(1, 2);
-        signal.addSample(2, 4);
-        signal.addSample(3, 8);
+        signal.addSample(1, 2, true);
+        signal.addSample(2, 4, true);
+        signal.addSample(3, 8, true);
         assert.deepEqual([
           makeSample(1, 2),
           makeSample(2, 4),
           makeSample(3, 8),
         ], signal.samples)
 
-        signal.addSample(4, 16);
+        signal.addSample(4, 16, true);
         assert.deepEqual([
           makeSample(2, 4),
           makeSample(3, 8),
           makeSample(4, 16),
         ], signal.samples)
+      });
+
+      test('resets on a headset off', function() {
+        const signal = new similarity.Signal(3);
+
+        signal.addSample(1, 2, true);
+        assert.deepEqual([makeSample(1, 2)], signal.samples)
+
+        signal.addSample(4, 0, false);
+        assert.deepEqual([], signal.samples)
       });
     });
 
@@ -110,7 +120,7 @@ suite('simiarity', function () {
       describe('not enough samples', function() {
         test('it is undefined with too few samples', function() {
           const signal = new similarity.Signal(2);
-          signal.addSample(1, 2);
+          signal.addSample(1, 2, true);
           assert.equal(undefined, signal.eval(6));
         });
       });
@@ -118,9 +128,9 @@ suite('simiarity', function () {
       describe('enough samples', function() {
         const makeSignal = () => {
           const signal = new similarity.Signal(3);
-          signal.addSample(2, 4);
-          signal.addSample(3, 8);
-          signal.addSample(4, 16);
+          signal.addSample(2, 4, true);
+          signal.addSample(3, 8, true);
+          signal.addSample(4, 16, true);
           return signal;
         }
 
