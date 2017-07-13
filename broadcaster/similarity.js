@@ -23,6 +23,17 @@ const expectedValue = (x) => {
   return x.reduce((sum, xi) => sum + xi) / x.length;
 };
 
+const align = (signal1, signal2) => {
+  let alignment = [undefined, undefined];
+  if (signal1.enoughSamples() && signal2.enoughSamples()) {
+    const times = new Set([...signal1.times(), ...signal2.times()]);
+    const orderedTimes = [...times].sort();
+    const subSample = (signal) => orderedTimes.map((ti) => signal.eval(ti));
+    alignment = [subSample(signal1), subSample(signal2)];
+  }
+  return alignment;
+};
+
 class Sample {
   constructor(time, value) {
     this.time = time;
@@ -85,5 +96,6 @@ class Signal {
 
 module.exports.expectedValue = expectedValue;
 module.exports.covariance = covariance;
+module.exports.align = align;
 module.exports.Signal = Signal;
 module.exports.Sample = Sample;

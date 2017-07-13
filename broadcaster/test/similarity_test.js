@@ -22,8 +22,25 @@ suite('simiarity', function () {
   });
 
   describe('#align', function() {
-    test('it returns undefined when not enough data')
-    test('it returns aligned samples when enough data')
+    test('it returns aligned samples when enough data', function() {
+      const signals = [new similarity.Signal(2), new similarity.Signal(3)];
+      signals[0].addSample(1, 4);
+      signals[0].addSample(4, 1);
+      signals[1].addSample(2, 3);
+      signals[1].addSample(4, 6);
+      signals[1].addSample(8, 12);
+      const [v1, v2] = similarity.align(signals[0], signals[1])
+
+      assert.deepEqual([4, 3, 1, 1], v1)
+      assert.deepEqual([3, 3, 6, 12], v2)
+    });
+
+    test('it returns undefined when not enough data', function() {
+      const signals = [new similarity.Signal(2), new similarity.Signal(3)];
+      const [v1, v2] = similarity.align(signals[0], signals[1])
+      assert.equal(undefined, v1)
+      assert.equal(undefined, v2)
+    });
   });
 
   suite('Signal', function() {
