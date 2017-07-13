@@ -23,6 +23,13 @@ const expectedValue = (x) => {
   return x.reduce((sum, xi) => sum + xi) / x.length;
 };
 
+class Sample {
+  constructor(time, value) {
+    this.time = time;
+    this.value = value;
+  }
+}
+
 class Signal {
   constructor(windowSize) {
     this.samples = new Array();
@@ -68,18 +75,15 @@ class Signal {
       throw "Time must move forward";
     }
 
-    const sample = this.makeSample(time, value);
+    const sample = new Sample(time, value);
     this.samples.push(sample);
     if (this.samples.length > this.windowSize) {
       this.samples.shift();
     }
-  }
-
-  makeSample(time, value) {
-    return { time, value };
   }
 }
 
 module.exports.expectedValue = expectedValue;
 module.exports.covariance = covariance;
 module.exports.Signal = Signal;
+module.exports.Sample = Sample;
