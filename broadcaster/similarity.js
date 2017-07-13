@@ -29,6 +29,10 @@ class Signal {
     this.windowSize = windowSize;
   }
 
+  times() {
+    return this.samples.map((sample) => sample.time);
+  }
+
   lastSample() {
     const tailIdx = this.samples.length - 1;
     return this.samples[tailIdx];

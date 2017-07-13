@@ -35,11 +35,21 @@ suite('simiarity', function () {
         assert.equal(undefined, signal.lastSample());
       });
 
-      test('returns value when present', function() {
+      test('it returns value when present', function() {
         const signal = new similarity.Signal(2);
         signal.addSample(1, 2);
         assert.deepEqual(makeSample(1,2), signal.lastSample());
       });
+    });
+
+    suite('#times', function() {
+      test('it returns times', function() {
+        const signal = new similarity.Signal(2);
+        signal.addSample(1, 2);
+        signal.addSample(3, 5);
+        assert.deepEqual([1,3], signal.times());
+      });
+
     });
 
     suite('#addSample', function() {
