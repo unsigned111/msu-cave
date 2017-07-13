@@ -59,7 +59,7 @@ class Signal {
       value = undefined;
     } else if (time <= this.firstSample().time) {
       value = this.firstSample().value;
-    } else if (this.lastSample().time < time) {
+    } else if (this.lastSample().time <= time) {
       value = this.lastSample().value;
     } else {
       const  index = this.samples.findIndex((sample) => time < sample.time);
