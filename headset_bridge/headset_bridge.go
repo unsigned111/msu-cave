@@ -28,7 +28,7 @@ func sendData(state State, url string) {
 	} else if response.StatusCode != 200 {
 		fmt.Println(response.Status, ": ", body)
 	} else {
-		fmt.Println("Request sent successfully")
+		fmt.Println("Request sent successfully", state.Timestamp)
 	}
 }
 
