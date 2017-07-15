@@ -41,18 +41,21 @@ func logData(state State, logFile *os.File) {
 }
 
 func aggregateor(
-	eegChan chan neurosky.EEG,
-	headsetOnChan chan bool,
+	hub Hub,
 	url string,
 	logFile *os.File,
 ) {
 	state := State{}
 	for {
 		select {
-		case eeg := <-eegChan:
+		case eeg := <-hub.EEG:
 			state.UpdateEEG(eeg)
-		case headsetOn := <-headsetOnChan:
-			state.TestUpdateHeadsetOn(headsetOn)
+		case headsetOn := <-hub.HeadsetOn:
+			state.UpdateHeadsetOn(headsetOn)
+		case attention := <-hub.Attention:
+			state.UpdateAttention(attention)
+		case meditation := <-hub.Meditation:
+			state.UpdateMeditation(meditation)
 		}
 		sendData(state, url)
 		logData(state, logFile)
@@ -61,16 +64,16 @@ func aggregateor(
 
 func makeRobot(
 	device string,
-	eegChan chan neurosky.EEG,
-	headsetOnChan chan bool,
+	hub Hub,
 ) *gobot.Robot {
 	adaptor := neurosky.NewNeuroskyAdaptor("neurosky", device)
 	neuro := neurosky.NewNeuroskyDriver(adaptor, "neuro")
 
 	work := func() {
+
 		gobot.On(neuro.Event("eeg"), func(data interface{}) {
 			eeg := data.(neurosky.EEG)
-			eegChan <- eeg
+			hub.EEG <- eeg
 		})
 
 		onOff := MakeOnOffModel(ON_OFF_THREASHOLD, ON_OFF_WINDOW_SIZE)
@@ -78,8 +81,20 @@ func makeRobot(
 			sample := data.(uint8)
 			onOff.AddSample(sample)
 			isOn := onOff.isOn()
-			headsetOnChan <- isOn
+			hub.HeadsetOn <- isOn
 		})
+
+		// TODO:DLM: figure out why meditation and attention
+		// are not sending anything but 0
+		// gobot.On(neuro.Event("attention"), func(data interface{}) {
+		// 	attention := data.(uint8)
+		// 	hub.Attention <- int(attention)
+		// })
+		//
+		// gobot.On(neuro.Event("meditation"), func(data interface{}) {
+		// 	meditation := data.(uint8)
+		// 	hub.Meditation <- int(meditation)
+		// })
 	}
 	robot := gobot.NewRobot(
 		"brainBot",
@@ -94,6 +109,13 @@ type AppArgs struct {
 	Device      string
 	Url         string
 	LogFileName string
+}
+
+type Hub struct {
+	EEG        chan neurosky.EEG
+	HeadsetOn  chan bool
+	Attention  chan int
+	Meditation chan int
 }
 
 func parseArgs() AppArgs {
@@ -165,14 +187,18 @@ func main() {
 	}
 
 	// setup the channels
-	eegChan := make(chan neurosky.EEG)
-	headsetOnChan := make(chan bool)
+	hub := Hub{
+		EEG:        make(chan neurosky.EEG),
+		HeadsetOn:  make(chan bool),
+		Attention:  make(chan int),
+		Meditation: make(chan int),
+	}
 
 	// init aggregator
-	go aggregateor(eegChan, headsetOnChan, args.Url, logFile)
+	go aggregateor(hub, args.Url, logFile)
 
 	// make the robot
-	robot1 := makeRobot(args.Device, eegChan, headsetOnChan)
+	robot1 := makeRobot(args.Device, hub)
 
 	// initialize gobot
 	gbot := gobot.NewGobot()
