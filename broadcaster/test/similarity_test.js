@@ -153,4 +153,77 @@ suite('similarity', function () {
       });
     });
   });
+
+  suite('SignalBank', function() {
+    const makeRawData = (val, headsetOn) => {
+      return {
+        raw_data: {
+          delta: val, headsetOn, timestamp: Date.now(),
+        },
+      };
+    };
+
+    const makeNewSample = () => {
+      return {
+        e: makeRawData(1578003, true),
+        f: makeRawData(1578003, true),
+      };
+    };
+
+    suite('#constructor', function() {
+      it('sets the local id', function() {
+        const bank = new similarity.SignalBank('myLocalId', 2);
+        assert.equal('myLocalId', bank.localID);
+      });
+
+      it('sets the window size', function() {
+        const bank = new similarity.SignalBank('myLocalId', 2);
+        assert.equal(2, bank.windowSize);
+      });
+    });
+
+    suite('#getSignal', function() {
+      const localID = 'localID';
+
+      test('it creats a signal if there is not one', function() {
+        const bank = new similarity.SignalBank(localID, 2);
+        bank.getSignal(localID);
+        assert(bank.signals[localID])
+      });
+
+      test('it returns signal if there is one', function() {
+        const bank = new similarity.SignalBank(localID, 2);
+        const signal = bank.getSignal(localID);
+        assert.equal(signal, bank.getSignal(localID));
+      });
+    });
+
+    suite('#addSamples', function() {
+      const localID = 'localID';
+
+      test('it adds a sample', function() {
+        const bank = new similarity.SignalBank(localID, 2);
+        const sample = { localID: makeRawData(10, true) };
+
+        bank.addSamples(sample);
+        assert.deepEqual(
+          [{ time: sample[localID].raw_data.timestamp, value: 10 }],
+          bank.signals[localID].samples
+        )
+      });
+    });
+
+    suite('#getRemoteSignals', function() {
+      const bank = new similarity.SignalBank('local', 2);
+
+      bank.getSignal('local');
+      const remoteSignal = bank.getSignal('remote');
+
+      assert.deepEqual([remoteSignal], bank.getRemoteSignals());
+    })
+
+    suite('#similarity', function() {
+      test('it computes the similarity');
+    });
+  });
 });

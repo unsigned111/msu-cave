@@ -98,8 +98,59 @@ class Signal {
   }
 }
 
+class SignalBank {
+  constructor(localID, windowSize) {
+    this.windowSize = windowSize;
+    this.localID = localID;
+    this.signals = new Map();
+  }
+
+  getSignal(key) {
+    let signal = this.signals[key];
+    if (!signal) {
+      signal = new Signal(this.windowSize);
+      this.signals[key] = signal;
+    }
+    return signal;
+  }
+
+  addSamples(samples) {
+    for (let key in samples) {
+      const rawData = samples[key].raw_data;
+      const value = rawData.delta;
+      const time = rawData.timestamp;
+      const headsetOn = rawData.headsetOn;
+
+      const target = this.getSignal(key);
+      target.addSample(time, value, headsetOn);
+    }
+  }
+
+  getRemoteSignals() {
+    const remoteSignals = [];
+    for (let key in this.signals) {
+      if (key === this.localID) { continue; }
+      remoteSignals.push(this.getSignal(key))
+    }
+    return remoteSignals;
+  }
+
+  similarity() {
+    const localSignal = this.getSignal(this.localID);
+    const toCovariance = (signal) => {
+      const [v1, v2] = align(localSignal, signal);
+      return covariance(v1, v2);
+    };
+
+    return this.getRemoteSignals()
+      .map(toCovariance)
+      .reduce((agg, cov) => agg + cov, 0);
+  }
+}
+
 module.exports.expectedValue = expectedValue;
 module.exports.covariance = covariance;
 module.exports.align = align;
 module.exports.Signal = Signal;
 module.exports.Sample = Sample;
+module.exports.SignalBank = SignalBank;
