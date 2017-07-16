@@ -57,6 +57,10 @@ class OSCBroadcaster {
   }
 
   publish(data) {
+  publishToAll(channel, data) {
+    this.clients.forEach((client) => client.send(channel, data));
+  }
+
     // Send an eeg OSC message
     const eegData = [
       data.timestamp,
@@ -69,13 +73,13 @@ class OSCBroadcaster {
       data.midGamma,
       data.theta,
     ];
-    this.clients.forEach(function(client) { client.send("/eeg", eegData); });
+    this.publishToAll("/eeg", eegData);
 
     // Send an on/off OSC message
     const onOffData = [
       data.headsetOn ? 1 : 0,
     ]
-    this.clients.forEach(function(client) { client.send("/onoff", onOffData); });
+    this.publishToAll("/onoff", onOffData);
   }
 }
 
