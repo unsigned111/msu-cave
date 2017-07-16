@@ -56,11 +56,11 @@ class OSCBroadcaster {
     this.clients = clients;
   }
 
-  publish(data) {
   publishToAll(channel, data) {
     this.clients.forEach((client) => client.send(channel, data));
   }
 
+  publishHeadset(data) {
     // Send an eeg OSC message
     const eegData = [
       data.timestamp,

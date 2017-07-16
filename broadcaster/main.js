@@ -69,7 +69,7 @@ firebaseBroadcaster.subscribe(onRemoteData);
 const onLocalData = (body) => {
   console.log(body)
   firebaseBroadcaster.publish(body);
-  oscBroadcaster.publish(body);
+  oscBroadcaster.publishHeadset(body);
 }
 const webServer = new server.Server(argv.port, onLocalData);
 webServer.start();
