@@ -4,7 +4,7 @@ const assert = require('chai').assert;
 
 const similarity = require('../similarity');
 
-suite('simiarity', function () {
+suite('similarity', function () {
   suite('#expectedValue', function() {
     test('it returns the expected value', function() {
       const result = similarity.expectedValue([1,2,3,4,5]);
