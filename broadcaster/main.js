@@ -2,7 +2,6 @@
 'use strict';
 
 var yargs = require('yargs');
-var osc = require('node-osc');
 var fs = require('fs');
 
 var broadcaster = require('./broadcaster');
@@ -31,10 +30,6 @@ var argv = yargs
   .demand('e')
   .alias('e', 'eeg-headset-id')
   .describe('e', 'The eeg headset id')
-  //log file
-  .default('l', '')
-  .alias('l', 'log-file-name')
-  .describe('l', 'The logfile name')
   //osc clients
   .default('o', [])
   .alias('o', 'osc-servers')
@@ -45,57 +40,36 @@ var argv = yargs
   .alias('h', 'help')
   .argv;
 
+// setup the osc clients. The osc broadcaser hands the heavy lifting
+// of sending the data over to the OSC clients
+const clients = argv.oscServers.map(broadcaster.oscClient);
+const oscBroadcaster = new broadcaster.OSCBroadcaster(clients);
+
 // create and initialize the broadcaster object.  The broadcaster handles
 // much of the heavy lifting for communicating updates on the node to
 // the firebase serer
-let db = new broadcaster.firebaseDB(argv.credentials, argv.firebase_url);
-let firebaseBroadcaster = new broadcaster.Broadcaster(
+const db = new broadcaster.firebaseDB(argv.credentials, argv.firebase_url);
+const firebaseBroadcaster = new broadcaster.FirebaseBroadcaster(
   db, argv.installationId, argv.eegHeadsetId
 );
 
 // initialize so that every time remote data is updated the onRemoteData
 // method is called.  This should hook into the covariance calculator either
 // by sending a message to the covariance sevice or calling directly.
-function onRemoteData(snapshot) {
+const onRemoteData = (snapshot) => {
   // NOTE:DLM: whoever is doing the covariance, this is where you can hook
   // in your code or call your service.  If you are going to call your
   // service, I recommend using the requests module
   // https://github.com/request/request
-  console.log(snapshot.val());
 }
 firebaseBroadcaster.subscribe(onRemoteData);
 
-// setup the osc clients
-var clients = argv.oscServers.map(function(rawClientAddress) {
-  let clientAddress = rawClientAddress.split(':');
-  return new osc.Client(clientAddress[0], clientAddress[1]);
-});
-
 // setup the server so that everything it receives some new data it is
 // published to the remote data server.
-function onLocalData(body) {
+const onLocalData = (body) => {
+  console.log(body)
   firebaseBroadcaster.publish(body);
-
-  // Send an OSC message
-  var data = [
-    body.timestamp,
-    body.delta,
-    body.hiAlpha,
-    body.hiBeta,
-    body.loAlpha,
-    body.loBeta,
-    body.loGamma,
-    body.midGamma,
-    body.theta
-  ];
-  console.log(data);
-
-  let logFileName = argv.logFileName;
-  if (logFileName) {
-    fs.appendFile(logFileName, [body.timestamp].concat(data) + "\n");
-  }
-
-  clients.forEach(function(client) { client.send("/eeg", data); });
+  oscBroadcaster.publish(body);
 }
-var server = new server.Server(argv.port, onLocalData);
-server.start();
+const webServer = new server.Server(argv.port, onLocalData);
+webServer.start();

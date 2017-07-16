@@ -18,10 +18,13 @@ all: headset_bridge
 run: headset_bridge
 	./headset_bridge
 
-headset_bridge: pkg headset_bridge.go
+test:
+	go test
+
+headset_bridge: pkg *.go
 	go build -o headset_bridge
 
-headset_bridge.arm: pkg headset_bridge.go
+headset_bridge.arm: pkg *.go
 	env GOOS=linux GOARCH=arm go build -o headset_bridge.arm
 
 # depend is just an alias for pkg.
@@ -34,6 +37,7 @@ pkg:
 	go get -d -u github.com/hybridgroup/gobot/...
 	go install github.com/hybridgroup/gobot/platforms/neurosky
 	go get github.com/parnurzeal/gorequest
+	go get github.com/stretchr/testify/assert
 
 # standard go clean
 clean:

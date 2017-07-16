@@ -2,6 +2,7 @@
 'use strict';
 
 var firebase = require('firebase');
+var osc = require('node-osc');
 
 function firebaseDB(credentials, url) {
   firebase.initializeApp({
@@ -11,7 +12,7 @@ function firebaseDB(credentials, url) {
   return firebase.database();
 }
 
-class Broadcaster {
+class FirebaseBroadcaster {
   constructor(database, installationID, headsetID) {
     this.db = database;
     this.installationID = installationID;
@@ -44,6 +45,41 @@ class Broadcaster {
   }
 }
 
-module.exports.firebaseDB = firebaseDB;
-module.exports.Broadcaster = Broadcaster;
 
+function oscClient(rawClientAddress) {
+  let clientAddress = rawClientAddress.split(':');
+  return new osc.Client(clientAddress[0], clientAddress[1]);
+}
+
+class OSCBroadcaster {
+  constructor(clients) {
+    this.clients = clients;
+  }
+
+  publish(data) {
+    // Send an eeg OSC message
+    const eegData = [
+      data.timestamp,
+      data.delta,
+      data.hiAlpha,
+      data.hiBeta,
+      data.loAlpha,
+      data.loBeta,
+      data.loGamma,
+      data.midGamma,
+      data.theta,
+    ];
+    this.clients.forEach(function(client) { client.send("/eeg", eegData); });
+
+    // Send an on/off OSC message
+    const onOffData = [
+      data.headsetOn ? 1 : 0,
+    ]
+    this.clients.forEach(function(client) { client.send("/onoff", onOffData); });
+  }
+}
+
+module.exports.firebaseDB = firebaseDB;
+module.exports.FirebaseBroadcaster = FirebaseBroadcaster;
+module.exports.oscClient = oscClient;
+module.exports.OSCBroadcaster = OSCBroadcaster;
