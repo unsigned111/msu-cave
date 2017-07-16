@@ -81,6 +81,10 @@ class OSCBroadcaster {
     ]
     this.publishToAll("/onoff", onOffData);
   }
+
+  publishSimilaritye(similarity) {
+    this.publishToAll("/similarity", [similarity]);
+  }
 }
 
 module.exports.firebaseDB = firebaseDB;
