@@ -22,14 +22,14 @@ class FirebaseBroadcaster {
 
   publish(data) {
     let payload = {};
-    payload[this.headsetID] = {
+    payload = {
       raw_data: data,
       timestamp: {
         server: firebase.database.ServerValue.TIMESTAMP,
         node: (new Date()).getTime()
       }
     };
-    this._ref.set(payload);
+    this._ref.child(this.headsetID).set(payload);
   }
 
   subscribe(callback) {
