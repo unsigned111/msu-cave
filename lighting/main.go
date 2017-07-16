@@ -16,7 +16,7 @@ var headsetOn bool
 var headsetLock sync.Mutex
 var similarity float64
 var similarityLock sync.Mutex
-var colorChannel = make(chan LightingColor, 256)
+var colorChannel = make(chan LightingColor, 512)
 var debug bool
 
 // Runs the OSC to ArtNet packet service.
@@ -36,7 +36,7 @@ func handleRuntimeFlags() {
 	settings = ParseConfig(*configFlag)
 	debug = *debugFlag
 	headsetLock.Lock()
-	headsetOn = settings.DefaultOn
+	headsetOn = true
 	headsetLock.Unlock()
 }
 
@@ -113,14 +113,18 @@ func handleOnOff(value int) {
 	} else {
 		headsetOn = true
 	}
-	log.Printf("Turning headset listening %t\n", headsetOn)
+	if debug {
+		log.Printf("Turning headset listening %t\n", headsetOn)
+	}
 	headsetLock.Unlock()
 }
 
 func handleSimilarity(value float64) {
 	similarityLock.Lock()
 	similarity = value
-	log.Printf("RECEIVED SIMILARITY : %f\n", similarity)
+	if debug {
+		log.Printf("RECEIVED SIMILARITY : %f\n", similarity)
+	}
 	similarityLock.Unlock()
 }
 
@@ -128,13 +132,17 @@ func handleSimilarity(value float64) {
 // states linearly interpolated between the last broadcast lighting state to
 // the next desired lighting state.
 func activeLighting(value int) {
-	if debug {
-		log.Printf("RECIEVED VALUE (channel %d): %d\n", settings.HeadsetChannel, value)
-	}
-	if readHeadsetState() {
+	if readHeadsetState() == true {
+		if debug {
+			log.Printf("RECIEVED VALUE (channel %d): %d\n", settings.HeadsetChannel, value)
+		}
+
+		flushQueue()
 
 		var nextColor LightingColor
 		var target float32
+		var intensity = int(float32(float64(settings.MaxIntensity - settings.MinIntensity) * similarity)) + settings.MinIntensity
+
 		// if we have received a 0 value, use the last frame instead
 		if value == 0 {
 			nextColor = lastColor
@@ -144,7 +152,6 @@ func activeLighting(value int) {
 			var greenSpec = float32(settings.EndColor.Green - settings.StartColor.Green)
 			var blueSpec = float32(settings.EndColor.Blue - settings.StartColor.Blue)
 			var whiteSpec = float32(settings.EndColor.White - settings.StartColor.White)
-			var intensitySpec = float32(settings.EndColor.Intensity - settings.StartColor.Intensity)
 
 			target = float32(value) / float32(settings.Scaler)
 			nextColor = LightingColor{
@@ -152,7 +159,7 @@ func activeLighting(value int) {
 				int(target*greenSpec) + settings.StartColor.Green,
 				int(target*blueSpec) + settings.StartColor.Blue,
 				int(target*whiteSpec) + settings.StartColor.White,
-				int(target*intensitySpec) + settings.StartColor.Intensity,
+				intensity,
 			}
 			colors = lastColor.Interpolate(nextColor, settings.FPS-1)
 			queueColors(colors)
@@ -171,9 +178,9 @@ func activeLighting(value int) {
 // until the headset flag is flipped back on.
 func idleLighting() {
 	halfPulseLength := settings.FPS * (settings.PulseLength >> 1)
-	pauseDuration := time.Duration(settings.PulsePause)
+	pauseDuration := time.Duration(settings.PulsePause) * time.Second
 	for {
-		if !(readHeadsetState()) {
+		if readHeadsetState() == false {
 			// calculate the number of messages to send using the FPS and the Pulse Length from settings
 			rampUp := settings.OffStartColor.Interpolate(settings.OffEndColor, halfPulseLength)
 			queueColors(rampUp)
@@ -187,14 +194,9 @@ func idleLighting() {
 
 // Initializes the lighting system.
 func initLighting() {
-	if settings.DefaultOn {
-		queueColor(settings.StartColor)
-		lastColor = settings.StartColor
-	} else {
-		blackout := Blackout()
-		queueColor(blackout)
-		lastColor = blackout
-	}
+	blackout := Blackout()
+	queueColor(blackout)
+	lastColor = blackout
 }
 
 // Enqueues a collection of LightingColors into the lighting queue.

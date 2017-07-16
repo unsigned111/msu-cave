@@ -13,6 +13,7 @@ type Settings struct {
 
 	StartColor, EndColor       LightingColor
 	OffStartColor, OffEndColor LightingColor
+	MaxIntensity, MinIntensity int
 	PulseAmount                float32
 	PulseLength, PulsePause    int
 	DefaultOn                  bool
