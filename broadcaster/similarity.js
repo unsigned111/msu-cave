@@ -100,14 +100,14 @@ class Signal {
       throw "Time must move forward";
     }
 
-    if (headsetOn) {
-      const sample = new Sample(time, value);
+    const sample = new Sample(time, value);
+    if (!headsetOn) {
+      this.samples = [];
+    } else if (!sample.isEqual(this.lastSample())) {
       this.samples.push(sample);
       if (this.samples.length > this.windowSize) {
         this.samples.shift();
       }
-    } else {
-      this.samples = [];
     }
   }
 }

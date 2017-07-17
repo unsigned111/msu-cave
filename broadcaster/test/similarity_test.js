@@ -148,6 +148,16 @@ suite('similarity', function () {
           makeSample(1, 3),
         ], signal.samples);
       });
+
+      test('inputting the same sample', function() {
+        const signal = new similarity.Signal(3);
+        signal.addSample(1, 2, true);
+        signal.addSample(1, 2, true);
+
+        assert.deepEqual([
+          makeSample(1, 2),
+        ], signal.samples);
+      });
     });
 
     suite('#eval', function() {
