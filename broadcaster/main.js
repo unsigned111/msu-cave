@@ -6,6 +6,7 @@ var fs = require('fs');
 
 var broadcaster = require('./broadcaster');
 var server = require('./server');
+var similarity = require('./similarity');
 
 // setup the argument paring
 var argv = yargs
@@ -56,12 +57,13 @@ const firebaseBroadcaster = new broadcaster.FirebaseBroadcaster(
 // initialize so that every time remote data is updated the onRemoteData
 // method is called.  This should hook into the covariance calculator either
 // by sending a message to the covariance sevice or calling directly.
+const windowSize = 5;
+const signalBank = new similarity.SignalBank(argv.eegHeadsetId, windowSize);
 const onRemoteData = (snapshot) => {
-  // NOTE:DLM: whoever is doing the covariance, this is where you can hook
-  // in your code or call your service.  If you are going to call your
-  // service, I recommend using the requests module
-  // https://github.com/request/request
-}
+  signalBank.addSamples(snapshot.val());
+  const sim = signalBank.similarity();
+  oscBroadcaster.publishSimilarity(sim);
+};
 firebaseBroadcaster.subscribe(onRemoteData);
 
 // setup the server so that everything it receives some new data it is
@@ -69,7 +71,7 @@ firebaseBroadcaster.subscribe(onRemoteData);
 const onLocalData = (body) => {
   console.log(body)
   firebaseBroadcaster.publish(body);
-  oscBroadcaster.publish(body);
+  oscBroadcaster.publishHeadset(body);
 }
 const webServer = new server.Server(argv.port, onLocalData);
 webServer.start();
