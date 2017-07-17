@@ -82,7 +82,7 @@ class OSCBroadcaster {
     this.publishToAll("/onoff", onOffData);
   }
 
-  publishSimilaritye(similarity) {
+  publishSimilarity(similarity) {
     this.publishToAll("/similarity", [similarity]);
   }
 }
