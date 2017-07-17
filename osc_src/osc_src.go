@@ -124,7 +124,7 @@ func eegSender() {
 
 func toggleSender() {
 	endpoint := "/onoff"
-	onoff := false
+	onoff := true
 	for {
 		var value int
 		if onoff {
@@ -137,7 +137,7 @@ func toggleSender() {
 		messageChannel <- msg
 		onoff = !onoff
 		fmt.Println(endpoint, ":\t", value)
-		time.Sleep(time.Duration(args.Delay * 10) * time.Second)
+		time.Sleep(time.Duration(args.Delay * 20) * time.Second)
 	}
 }
 

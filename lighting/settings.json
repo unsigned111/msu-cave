@@ -12,7 +12,7 @@
   "MaxIntensity":255,
 
   "PulseLength":10,
-  "PulsePause":8,
+  "PulsePause":4,
   "PulseAmount":0.75,
 
   "FPS":10,
