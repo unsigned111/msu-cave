@@ -245,8 +245,49 @@ suite('similarity', function () {
     })
 
     suite('#similarity', function() {
-      test('when local is inactive it returns undefined');
-      test('when the headset is active and no others around it returns undefined')
+      test('it returns 0 when local is inactive', function() {
+        const bank = new similarity.SignalBank('local', 4);
+
+        bank.addSamples({
+          local: makeRawData(15151, false),
+          remote1: makeRawData(30567, true),
+        });
+        bank.addSamples({
+          local: makeRawData(152782, false, 5),
+          remote1: makeRawData(814364, true, 5),
+        });
+        bank.addSamples({
+          local: makeRawData(67037, false, 10),
+          remote1: makeRawData(1170322, true, 10),
+        });
+        bank.addSamples({
+          local: makeRawData(630661, false, 15),
+          remote1: makeRawData(1187917, true, 15),
+        });
+        assert.equal(0, bank.similarity());
+      });
+
+      test('it returns 0 when the headset is active and no others active', function() {
+        const bank = new similarity.SignalBank('local', 4);
+
+        bank.addSamples({
+          local: makeRawData(15151, true),
+          remote1: makeRawData(30567, false),
+        });
+        bank.addSamples({
+          local: makeRawData(152782, true, 5),
+          remote1: makeRawData(814364, false, 5),
+        });
+        bank.addSamples({
+          local: makeRawData(67037, true, 10),
+          remote1: makeRawData(1170322, false, 10),
+        });
+        bank.addSamples({
+          local: makeRawData(630661, true, 15),
+          remote1: makeRawData(1187917, false, 15),
+        });
+        assert.equal(0, bank.similarity());
+      });
 
       test('it returns value when active and others around ', function() {
         const bank = new similarity.SignalBank('local', 4);
@@ -274,8 +315,7 @@ suite('similarity', function () {
           remote2: makeRawData(287963, true, 15),
         });
 
-        const sim = bank.similarity();
-        assert.approximately(0.420775, sim, 0.0001);
+        assert.approximately(0.420775, bank.similarity(), 0.0001);
       });
     });
   });

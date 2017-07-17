@@ -149,15 +149,20 @@ class SignalBank {
 
   similarity() {
     const localSignal = this.getSignal(this.localID);
-    const toAbsCorrelationCoeff = (signal) => {
-      const [v1, v2] = align(localSignal, signal);
-      return Math.abs(correlationCoeff(v1, v2));
-    };
-
-
     const remoteSignals = this.getActiveRemoteSignals();
-    return remoteSignals.map(toAbsCorrelationCoeff)
-      .reduce((agg, corr) => agg + (corr / remoteSignals.length), 0);
+
+    let sim = 0;
+    if (localSignal.enoughSamples()) {
+      const toAbsCorrelationCoeff = (signal) => {
+        const [v1, v2] = align(localSignal, signal);
+        return Math.abs(correlationCoeff(v1, v2));
+      };
+
+      sim = remoteSignals
+        .map(toAbsCorrelationCoeff)
+        .reduce((agg, corr) => agg + (corr / remoteSignals.length), 0);
+    }
+    return sim;
   }
 }
 
