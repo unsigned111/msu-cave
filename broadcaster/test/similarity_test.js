@@ -50,6 +50,22 @@ suite('similarity', function () {
     });
   });
 
+  suite('Sample', function() {
+    suite('#isEqual', function() {
+      test('is equal when values same', function() {
+        assert.isTrue(
+          new similarity.Sample(5, 6).isEqual(new similarity.Sample(5, 6))
+        );
+      });
+
+      test('is not equal when values different', function() {
+        assert.isFalse(
+          new similarity.Sample(5, 6).isEqual(new similarity.Sample(7, 6))
+        );
+      });
+    });
+  });
+
   suite('Signal', function() {
     const makeSample = (time, value) => new similarity.Sample(time, value);
 

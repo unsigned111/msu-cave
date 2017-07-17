@@ -49,6 +49,10 @@ class Sample {
     this.time = time;
     this.value = value;
   }
+
+  isEqual(other) {
+    return other && this.time === other.time && this.value === other.value;
+  }
 }
 
 class Signal {
