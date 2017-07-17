@@ -17,7 +17,7 @@ suite('similarity', function () {
       const x = [1.0, 5.5, 7.8, 4.2, -2.7, -5.4, 8.9];
       const y = [0.1, 1.5, 0.8, -4.2, 2.7, -9.4, -1.9];
       const result = similarity.correlationCoeff(x, y);
-      assert(0.3893218-result < 0.0001);
+      assert.approximately(0.3893218, result, 0.0001);
     });
   });
 
