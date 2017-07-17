@@ -26,7 +26,7 @@ const correlationCoeff = (x, y) => {
   const sigmaX = sigmaFromDelta(xDelta);
   const sigmaY = sigmaFromDelta(yDelta);
 
-  return num / (sigmaX * sigmaY);
+  return (sigmaX === 0 || sigmaY === 0) ? .5 : num / (sigmaX * sigmaY);
 };
 
 const expectedValue = (x) => {

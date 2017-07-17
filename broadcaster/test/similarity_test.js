@@ -19,6 +19,13 @@ suite('similarity', function () {
       const result = similarity.correlationCoeff(x, y);
       assert.approximately(0.3893218, result, 0.0001);
     });
+
+    test('it does not freak out for zero sigma', function() {
+      const x = [1.0, 1.0];
+      const y = [0.1, 0.78];
+      const result = similarity.correlationCoeff(x, y);
+      assert.isNotNaN(result);
+    });
   });
 
   describe('#align', function() {
