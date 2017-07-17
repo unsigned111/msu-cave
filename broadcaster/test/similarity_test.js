@@ -135,7 +135,7 @@ suite('similarity', function () {
         assert.deepEqual([makeSample(1, 2)], signal.samples)
 
         signal.addSample(4, 0, false);
-        assert.deepEqual([], signal.samples)
+        assert.deepEqual([], signal.samples);
       });
 
       test('time comes in at same time as last sample', function() {
@@ -146,7 +146,7 @@ suite('similarity', function () {
         assert.deepEqual([
           makeSample(1, 2),
           makeSample(1, 3),
-        ], signal.samples)
+        ], signal.samples);
       });
     });
 
