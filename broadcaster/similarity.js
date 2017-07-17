@@ -3,7 +3,7 @@
 
 const zip = (x, y) => x.map((xi, i) => [xi, y[i]]);
 
-const covariance = (x, y) => {
+const correlationCoeff = (x, y) => {
   if (x.length != y.length) { throw "Lengths must be equal"; }
 
   const xBar = expectedValue(x);
@@ -16,7 +16,17 @@ const covariance = (x, y) => {
   const num = zip(xDelta, yDelta)
     .reduce((sum, pi) => sum + (pi[0] * pi[1]), 0);
 
-  return num / (n-1);
+  const sigmaFromDelta = (delta) => {
+    const exp_diff = delta
+      .map((ai) => ai*ai)
+      .reduce((sum, aiSq) => sum + aiSq, 0);
+    return Math.sqrt(exp_diff);
+  }
+
+  const sigmaX = sigmaFromDelta(xDelta);
+  const sigmaY = sigmaFromDelta(yDelta);
+
+  return num / (sigmaX * sigmaY);
 };
 
 const expectedValue = (x) => {
@@ -136,20 +146,21 @@ class SignalBank {
   }
 
   similarity() {
-    const localSignal = this.getSignal(this.localID);
-    const toCovariance = (signal) => {
-      const [v1, v2] = align(localSignal, signal);
-      return covariance(v1, v2);
-    };
-
-    return this.getRemoteSignals()
-      .map(toCovariance)
-      .reduce((agg, cov) => agg + cov, 0);
+  //   const localSignal = this.getSignal(this.localID);
+  //   const toCovariance = (signal) => {
+  //     const [v1, v2] = align(localSignal, signal);
+  //     return covariance(v1, v2);
+  //   };
+  //
+  //   return this.getRemoteSignals()
+  //     .map(toCovariance)
+  //     .reduce((agg, cov) => agg + cov, 0);
+    return Math.random();
   }
 }
 
 module.exports.expectedValue = expectedValue;
-module.exports.covariance = covariance;
+module.exports.correlationCoeff = correlationCoeff;
 module.exports.align = align;
 module.exports.Signal = Signal;
 module.exports.Sample = Sample;
