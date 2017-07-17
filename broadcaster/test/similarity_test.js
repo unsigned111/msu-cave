@@ -121,6 +121,17 @@ suite('similarity', function () {
         signal.addSample(4, 0, false);
         assert.deepEqual([], signal.samples)
       });
+
+      test('time comes in at same time as last sample', function() {
+        const signal = new similarity.Signal(3);
+        signal.addSample(1, 2, true);
+        signal.addSample(1, 3, true);
+
+        assert.deepEqual([
+          makeSample(1, 2),
+          makeSample(1, 3),
+        ], signal.samples)
+      });
     });
 
     suite('#eval', function() {
