@@ -136,13 +136,15 @@ class SignalBank {
     }
   }
 
-  getRemoteSignals() {
-    const remoteSignals = [];
+  getActiveRemoteSignals() {
+    const activeRemoteSignals = [];
     for (let key in this.signals) {
-      if (key === this.localID) { continue; }
-      remoteSignals.push(this.getSignal(key))
+      const signal = this.getSignal(key)
+      if (key !== this.localID && signal.enoughSamples()) {
+        activeRemoteSignals.push(this.getSignal(key));
+      }
     }
-    return remoteSignals;
+    return activeRemoteSignals;
   }
 
   similarity() {

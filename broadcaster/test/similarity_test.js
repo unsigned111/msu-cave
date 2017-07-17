@@ -213,13 +213,17 @@ suite('similarity', function () {
       });
     });
 
-    suite('#getRemoteSignals', function() {
-      const bank = new similarity.SignalBank('local', 2);
+    suite('#getActiveRemoteSignals', function() {
+      const bank = new similarity.SignalBank('local', 1);
 
-      bank.getSignal('local');
+      bank.addSamples({
+        local: makeRawData(10, true),
+        remote: makeRawData(11, true),
+      });
       const remoteSignal = bank.getSignal('remote');
+      bank.getSignal('remoteInactive');
 
-      assert.deepEqual([remoteSignal], bank.getRemoteSignals());
+      assert.deepEqual([remoteSignal], bank.getActiveRemoteSignals());
     })
 
     suite('#similarity', function() {
