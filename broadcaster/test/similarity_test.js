@@ -155,10 +155,10 @@ suite('similarity', function () {
   });
 
   suite('SignalBank', function() {
-    const makeRawData = (val, headsetOn) => {
+    const makeRawData = (val, headsetOn, timeDelta=0) => {
       return {
         raw_data: {
-          delta: val, headsetOn, timestamp: Date.now(),
+          delta: val, headsetOn, timestamp: Date.now()+timeDelta,
         },
       };
     };
