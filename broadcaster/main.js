@@ -57,7 +57,8 @@ const firebaseBroadcaster = new broadcaster.FirebaseBroadcaster(
 // initialize so that every time remote data is updated the onRemoteData
 // method is called.  This should hook into the covariance calculator either
 // by sending a message to the covariance sevice or calling directly.
-const signalBank = new similarity.SignalBank();
+const windowSize = 5;
+const signalBank = new similarity.SignalBank(argv.eegHeadsetId, windowSize);
 const onRemoteData = (snapshot) => {
   signalBank.addSamples(snapshot.val());
   const sim = signalBank.similarity();
