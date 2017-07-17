@@ -148,16 +148,16 @@ class SignalBank {
   }
 
   similarity() {
-  //   const localSignal = this.getSignal(this.localID);
-  //   const toCovariance = (signal) => {
-  //     const [v1, v2] = align(localSignal, signal);
-  //     return covariance(v1, v2);
-  //   };
-  //
-  //   return this.getRemoteSignals()
-  //     .map(toCovariance)
-  //     .reduce((agg, cov) => agg + cov, 0);
-    return Math.random();
+    const localSignal = this.getSignal(this.localID);
+    const toAbsCorrelationCoeff = (signal) => {
+      const [v1, v2] = align(localSignal, signal);
+      return Math.abs(correlationCoeff(v1, v2));
+    };
+
+
+    const remoteSignals = this.getActiveRemoteSignals();
+    return remoteSignals.map(toAbsCorrelationCoeff)
+      .reduce((agg, corr) => agg + (corr / remoteSignals.length), 0);
   }
 }
 

@@ -227,7 +227,38 @@ suite('similarity', function () {
     })
 
     suite('#similarity', function() {
-      test('it computes the similarity');
+      test('when local is inactive it returns undefined');
+      test('when the headset is active and no others around it returns undefined')
+
+      test('it returns value when active and others around ', function() {
+        const bank = new similarity.SignalBank('local', 4);
+
+        bank.addSamples({
+          local: makeRawData(15151, true),
+          remote1: makeRawData(30567, true),
+          remote2: makeRawData(17206, true),
+          remote3: makeRawData(1262343, false),
+        });
+        bank.addSamples({
+          local: makeRawData(152782, true, 5),
+          remote1: makeRawData(814364, true, 5),
+          remote2: makeRawData(1252675, true, 5),
+          remote3: makeRawData(632536, false, 5),
+        });
+        bank.addSamples({
+          local: makeRawData(67037, true, 10),
+          remote1: makeRawData(1170322, true, 10),
+          remote2: makeRawData(1243019, true, 10),
+        });
+        bank.addSamples({
+          local: makeRawData(630661, true, 15),
+          remote1: makeRawData(1187917, true, 15),
+          remote2: makeRawData(287963, true, 15),
+        });
+
+        const sim = bank.similarity();
+        assert.approximately(0.420775, sim, 0.0001);
+      });
     });
   });
 });
