@@ -13,7 +13,7 @@ echo "Device Wireless MAC address: $wifi_address"
 function conn {
 	address=$(echo $1 | tr -d '"')
 	echo "Attempting connection to $address"
-	sudo rfcomm connect "hs1" "$address"
+	echo raspberry | sudo -kS rfcomm connect "hs1" "$address"
 }
 
 override_address=$(curl $firebase/config/pi_list/{$wifi_address}/override_address.json)
