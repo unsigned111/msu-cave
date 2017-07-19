@@ -11,7 +11,7 @@ function conn {
 	echo raspberry | sudo -kS rfcomm connect "hs1" "$address"
 }
 
-target_address=$(../fetch_firebase_data.sh | jq .target_address)
+target_address=$(./util/fetch_firebase_data.sh | jq .target_address)
 echo "Target MAC address: $target_address"
 while :
 do
