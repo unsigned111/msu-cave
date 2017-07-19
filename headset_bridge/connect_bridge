@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+
+while true; do
+    echo raspberry | sudo -kS ./headset_bridge/headset_bridge.arm -d /dev/rfcomm0
+    sleep 5
+done
