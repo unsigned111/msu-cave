@@ -34,6 +34,3 @@ echo "Current DHCP address: $dynamic_ip"
 echo "Static IP to be assigned: $static_ip"
 
 write_file $static_ip
-
-#echo "Replacing interfaces file"
-#mv interfaces /etc/network/

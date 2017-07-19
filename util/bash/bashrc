@@ -1,4 +1,5 @@
 #Add golang paths
+
 export GOPATH=$HOME/go
 
 
@@ -102,3 +103,7 @@ fi
 
 # set the history format to include the time of the command
 export HISTTIMEFORMAT=' %F %T '
+
+#Run startup Script
+cd ~/msu-cave/util/
+./startup-script.sh
