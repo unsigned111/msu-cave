@@ -16,12 +16,11 @@ function write_file {
 	echo "iface lo inet loopback" >> interfaces
 	echo "" >> interfaces
 	echo "# The primary network interface" >> interfaces
-	echo "auto $2" >> interfaces
-	echo "iface $2 inet static" >> interfaces
+	echo "auto iface $2 inet static" >> interfaces
 	echo "	address $address" >> interfaces
 	echo "	netmask 255.255.0.0" >> interfaces
 	echo "	network 10.0.0.0" >> interfaces
-	echo "	broadcast 10.0.0.255" >> interfaces
+	echo "	broadcast 10.1.255.255" >> interfaces
 	echo "	gateway 10.1.1.1" >> interfaces
 }
 
@@ -38,8 +37,6 @@ current_ip=$(hostname -I)
 echo "Current address: $Current_ip"
 echo "Static IP to be assigned: $static_ip"
 
-rm interfaces
-
 cd /sys/class/net/enx*/
 interface_mac=$(cat address)
 interface=$(echo "enx$interface_mac" | tr -d ':')
@@ -47,6 +44,4 @@ interface=$(echo "enx$interface_mac" | tr -d ':')
 write_file $static_ip $interface
 
 echo raspberry | sudo -kS mv interfaces /etc/network/interfaces
-echo raspberry | sudo -kS /etc/init.d/networking restart
-#echo raspberry | sudo -kS ifdown $interface
-#echo raspberry | sudo -kS ifup $interface
+#echo raspberry | sudo -kS reboot
