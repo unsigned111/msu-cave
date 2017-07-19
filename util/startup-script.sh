@@ -7,18 +7,24 @@
 cd ~/msu-cave/
 git pull
 
-current_hash=$(cat /sys/network/interfaces | md5sum)
-cd ~/msu-cave/util/generate_interface_file/
-./generate-interface.sh
-new_hash=$(cat interfaces | md5sum)
+mac=$(cat /sys/class/net/wlan0/address)
+pod=$(curl https://msu-cave.firebaseio.com/config/pi_list/$mac/pod.json)
+ip=$(curl https://msu-cave.firebaseio.com/config/pod_list/$pod/ip_address.json)
 
-if["$current_hash"!="$new_hash"]
+if [ $(hostname -I) == $ip ]
 then
-	echo "hashes dont match"
+	if [ $pod = "server" ]
+	then
+		echo "Successfully configured SSH server"
+	fi
+	echo "Network configuration correct."
+	echo "Starting Pod..."
+	cd ~/msu-cave/
+	./start
+else
+	./generate_interface_file/generate-interface.sh
+	#echo "Replacing interfaces file"
 	#echo raspberry | sudo -kS mv interfaces /sys/network/interfaces
-	#echo raspberry | sudo -kS reboot
+	#echo "Rebooting..."
+	echo raspberry | sudo -kS reboot
 fi
-
-#Start Forego
-cd /home/pi/msu-cave
-./forego start

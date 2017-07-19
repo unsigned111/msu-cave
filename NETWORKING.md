@@ -2,6 +2,7 @@
 ------
 All networked pod devices should be on the 10.0.0.255
 
+SSH IP Address:		 10.0.0.5
 
 1. Pod 1:
   * Raspberry Pi: 	 10.0.0.10
