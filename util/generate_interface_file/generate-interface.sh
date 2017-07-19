@@ -28,9 +28,10 @@ echo "Fetching data..."
 mac_address=$(cat /sys/class/net/wlan0/address)
 echo "Wireless MAC address: $mac_address"
 
-static_ip=$(curl https://msu-cave.firebaseio.com/config/pi_list/$mac_Address/ip_internal.json)
-dynamic_ip=$(ifconfig | grep \"inet\" | grep -v 127.0.0.1)
-echo "Current DHCP address: $dynamic_ip"
+pod=$(curl https://msu-cave.firebaseio.com/config/pi_list/$mac_address/pod.json)
+static_ip=$(curl https://msu-cave.firebaseio.com/config/pod_list/$pod/ip_address.json)
+current_ip=$(ifconfig | grep \"inet\" | grep -v 127.0.0.1)
+echo "Current address: $Current_ip"
 echo "Static IP to be assigned: $static_ip"
 
 write_file $static_ip

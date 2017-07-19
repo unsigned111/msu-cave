@@ -12,7 +12,7 @@ cd ~/msu-cave/util/generate_interface_file/
 ./generate-interface.sh
 new_hash=$(cat interfaces | md5sum)
 
-if["$current_hash" != "$new_hash"]
+if["$current_hash"!="$new_hash"]
 then
 	echo "hashes dont match"
 	#echo raspberry | sudo -kS mv interfaces /sys/network/interfaces
