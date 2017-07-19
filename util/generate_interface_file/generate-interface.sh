@@ -36,4 +36,4 @@ echo "Static IP to be assigned: $static_ip"
 write_file $static_ip
 
 #echo "Replacing interfaces file"
-#cp interfaces /etc/network/
+#mv interfaces /etc/network/
