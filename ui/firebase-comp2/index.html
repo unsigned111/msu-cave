@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Firebase</title>
+		<script src="https://www.gstatic.com/firebasejs/4.1.2/firebase.js"></script>
+		<script>
+			var firebase = require('firebase');
+			firebase.initializeApp({
+				serviceAccount : "./service-accnt.json",
+				databaseURL : "https://project01-b05c2.firebaseio.com/"
+			});
+		</script>
+		<script type="text/javascript" src="index.js"></script>
+	</head>
+<body>
+
+<button id="offbutton" onclick="offButton()">Click to power down</button>
+
+
+</body>
+</html> 
