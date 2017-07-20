@@ -100,6 +100,10 @@ func eegSender() {
 	file, err := os.Open(args.ReplayFileName)
 	check(err)
 	defer file.Close()
+
+        msg := osc.NewMessage("/onoff")
+        msg.Append(int32(1))
+        messageChannel <- msg
 	
 	reader := csv.NewReader(file)
 	// read header

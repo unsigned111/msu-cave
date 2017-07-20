@@ -1,7 +1,7 @@
 {
   "ListenIP": "127.0.0.1",
-  "ControlIP":"10.7.153.129",
-  "ListenPort":7770,
+  "ControlIP":"10.0.0.22",
+  "ListenPort":7000,
   "ControlPort":6454,
 
   "StartColor":{"Red":255,"Green":60,"Blue":0,"White":70,"Intensity":255},
