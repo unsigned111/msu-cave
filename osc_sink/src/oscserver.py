@@ -21,6 +21,7 @@ if __name__ == "__main__":
     dispatcher = dispatcher.Dispatcher()
     dispatcher.map("/eeg", make_print_handler("eeg: "), "debug")
     dispatcher.map("/onoff", make_print_handler("onoff: "), "debug")
+    dispatcher.map("/similarity", make_print_handler("similarity: "), "debug")
 
     server = osc_server.ThreadingOSCUDPServer((args.ip, args.port), dispatcher)
     print("Serving on {}".format(server.server_address))

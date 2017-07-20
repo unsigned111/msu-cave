@@ -1,20 +1,21 @@
 <CsoundSynthesizer>
 <CsOptions>
+;Halleluia
+;normalize amplitude between yesamp and similarity
 
+;envelope speed (pulsing) switch pulse env with straight line @ 1
+;similarity also has filter sweep
+;similarity has fm > 0 and filter sweep
 </CsOptions>
 <CsInstruments>
 
 sr = 44100
 ksmps = 100 ;samps / k-period
-nchnls = 2
-;0dbfs = 1.0
-
-;todo: reverb and/or delay
+nchnls = 1
+0dbfs = 1
 gihandle OSCinit 7770
-;ga1 init 0
 
 instr 1
-    kCount init 0
 	kf1 init 0
 	kf2 init 0
 	kf3 init 0
@@ -23,95 +24,105 @@ instr 1
 	kf6 init 0
 	kf7 init 0
 	kf8 init 0
-	;kf9 init 0
-
+	kCount init 0
+	konoff init 0
+	ksim init 0
+	
 	ibasefreq = p4
 	iscale = p5
-	ifn = p6
-	idelbase = p7
-nxtmsg:
+	isimscale = p6
+	ifn = p7
+	idelbase = p8
+	
+	icarifn = p9
+	imodfreq = p10
+	imodamp = p11
+	imod_ifn = p12
+
+	kpulse_env_amp = p13
+	ipulse_shape = p14
+	ilowpulse = p15
+	ihighpulse = p16
+	isimthresh = p17	
 
  	kk OSClisten gihandle, "/eeg", "iiiiiiiii", kCount, kf1, kf2, kf3, kf4, kf5, kf6, kf7, kf8
+	kk OSClisten gihandle, "/onoff", "i", konoff
+	kk OSClisten gihandle, "/similarity", "f", ksim
 
-	if (kk == 0) goto no_new_data
-	printks "%i %i %i %i %i %i %i %i %i\\n", 0, kCount, kf1, kf2, kf3, kf4, kf5, kf6, kf7, kf8
-no_new_data:
+	printks "%i %i %i %i %i %i %i %i %i\\n", 0, kCount, kf1, kf2, kf3, kf4, kf5, kf6, kf7, kf8	
+	printks "toggle is %i\\n", 0, konoff	
+	printks "similarity is %f\\n", 0, ksim
 
+if (konoff == 0) then 
+	kgoto noamp
+	
+elseif (ksim  >= isimthresh ) && (konoff == 1) then
+	kgoto  similarity ; goto similarity and PULSE
+	
+elseif (ksim < isimthresh) && (konoff == 1) then
+	kgoto yesamp
+	
+endif
+
+yesamp:
  	;USING DATA FOR AMPLITUDE
- 	asig1 oscili kf1*iscale, ibasefreq, ifn
- 	asig2 oscili kf2*iscale, ibasefreq * 2, ifn
- 	asig3 oscili kf3*iscale, ibasefreq * 3, ifn
- 	asig4 oscili kf4*iscale, ibasefreq * 4, ifn
- 	asig5 oscili kf5*iscale, ibasefreq * 5, ifn
- 	asig6 oscili kf6*iscale, ibasefreq * 6, ifn
- 	asig7 oscili kf7*iscale, ibasefreq * 7, ifn
- 	asig8 oscili kf8*iscale, ibasefreq * 8, ifn
-; 	asig9 oscili kf9*iscale, ibasefreq* 9, ifn
+ 	;currentkf / maxkf
+ 	
+ 	asig0 oscili .1 , ibasefreq, 1
+ 	asig1 oscili (kf1 / 18000000) * iscale, ibasefreq, ifn
+ 	asig2 oscili (kf2 / 18000000) * iscale, ibasefreq * 2, ifn
+ 	asig3 oscili (kf3 / 18000000) * iscale, ibasefreq * 3, ifn
+ 	asig4 oscili (kf4 / 18000000) * iscale, ibasefreq * 4, ifn
+  	asig5 oscili (kf5 / 18000000) * iscale, ibasefreq * 5, ifn
+ 	asig6 oscili (kf6 / 18000000) * iscale, ibasefreq * 6, ifn
+ 	asig7 oscili (kf7 / 18000000) * iscale, ibasefreq * 7, ifn
+ 	asig8 oscili (kf8 / 18000000) * iscale, ibasefreq * 8, ifn
 
 
- 	aoutsig = asig1 + asig2 + asig3 + asig4 + asig5 + asig6 + asig7 + asig8 ; + asig9
- 	acomp oscili 1000, 1000, 1
+ 	aoutsig = asig0 + asig1 + asig2 + asig3 + asig4 + asig5 + asig6 + asig7 + asig8 
+ 	aoutsig = aoutsig * iscale
+ 	acomp oscili 1, 400, 1
  	abal balance aoutsig, acomp
 
+	afiltsig2 butlp abal, 1000 	
+	afiltsig butlp afiltsig2,  1000
+	
+	adelay1 delay afiltsig, idelbase
+	adelay2 delay afiltsig, idelbase * .2
+	adelay3 delay afiltsig, idelbase * .3
+	adelay4 delay afiltsig, idelbase * .4
+	adelay5 delay afiltsig, idelbase * .5	
+	adelay6 delay afiltsig, idelbase * .6	
+	adelay7 delay afiltsig, idelbase * .7	
+	adelay8 delay afiltsig, idelbase * .8	
+	
+	adelays = adelay1 + adelay2 + adelay3 + adelay4 + adelay5 + adelay6 + adelay7 + adelay8 
 
-		afiltsig butlp abal,  1500
+ 	abal2 balance adelays, acomp
+	aout = abal2 
+	kgoto output 
+
+similarity:
+	;printks "SIMILARITY ** SECTION\\n", 0, ksim
+	;scale the incoming ksim to min and max pulses per second
+ 	kpulse_freq scale ksim, ihighpulse, ilowpulse
+ 	
+	kpulse_env oscili kpulse_env_amp, kpulse_freq, ipulse_shape
+	amod oscili imodamp, imodfreq, imod_ifn
+	amod2 = amod  * kpulse_env
+
+	acar oscili isimscale * kpulse_env,  ibasefreq + amod2, icarifn
+	
+	aout = acar 
+	kgoto output
+	
+output:
+	out aout
 
 
-kenver oscili  1, 2, 3
-aenvfiltsig =  kenver * afiltsig
-;ares delay asig, idlt [, iskip]
-adelay1 delay aenvfiltsig, idelbase
-adelay2 delay aenvfiltsig, idelbase * .2
-adelay3 delay aenvfiltsig, idelbase * .3
-adelay4 delay aenvfiltsig, idelbase * .4
-adelay5 delay aenvfiltsig, idelbase * .5
-adelay6 delay aenvfiltsig, idelbase * .6
-adelay7 delay aenvfiltsig, idelbase * .7
-adelay8 delay aenvfiltsig, idelbase * .8
-adelay9 delay aenvfiltsig, idelbase * .9
-adelay10 delay aenvfiltsig, idelbase * 1
-
-
-
-adelays = adelay1 + adelay2 + adelay3 + adelay4 + adelay5 + adelay6 + adelay7 + adelay8 + adelay9 + adelay10
- abal2 balance adelays, acomp
-
-apanL, apanR pan2 abal2, p8
-;apanR pan2 abal2, .7
-
- 	;	ga1 += afiltsig.
-
- 		outs apanL, apanR
-
+noamp:
 	endin
 
-instr 2
-ienvpersec = p4
-asig oscili 10000, 440, 1
-;aenver oscil1 idel, kamp, idur [, ifn]
-kenver oscili  1, ienvpersec,  3
-
-outs asig * kenver, asig * kenver
-;outs asig , asig
-
-endin
-
-
-;  instr 3; reverb of gaBus and output
-;
-;;  ares reverb asig, krvt [, iskip]
-;
-; igscale = p4
-; irevtime = p5
-;ares reverb ga1*igscale, irevtime
-;
-;;aoutL, aoutR reverbsc ainL, ainR, kfblvl, kfco[, israte[, ipitchm[, iskip]]]
-;          outs      ares, ares
-;  endin
-;
-;  instr 100; clear global audios at the end
-;          clear     ga1, ga1
-;  endin
 
 
 </CsInstruments>
@@ -119,45 +130,19 @@ endin
 ;f1 0 16384 10 1 0 1 .8 .6 .3 .1
 ;f1 0 16384 10 1 0 .6 0 .1
 f1 0 16384 10 1
-f2 0 16384 10 1 0 1 0 .5 0 .2 0 .01
+f2 0 16384 10 1 0 1 0 .5 0 .2
 f4 0 16384 10 1 0 1
-f3 0 16384 9 0.5 1 0
-
-;              freq scale ifn idelbase   pan
-;these two
-;i1 0    3000  46     1    1  .0411229     .11
-;i1 .2   3000   138  .7   1   .1013524     .85
+f3 0 1024 9 0.5 1 0 ; half sine
+f5 0 1025 7  0.01    150 .5    100 1    230 1  100 .4  445 0.01 ;exponential shark fin
+f6 0 1025 5 .01 1025 .01
+f7 0 1025 5 .01 200 .5    100 1  300 1   212 .5   200 .3  313 .01 ;throb
 
 
-;these two
-i1 .8  3000     36         .7   1  .01   .85
-i1 .39 3000     239.4432   .5   1   .002   .15
+;         freq  amp simamp ifn idel   carifn  modfreq modamp modifn pulseNVamp pulseshape minpulse pulsehigh simthr
+;         p4      5   6    7    8       9       10     11     12      13        14       15         16       17
+i1 0 3000 146.83 .015 1   1    .8     1       97.8     25     1     1           5       .8         1.5      .6
+i1 0.153 3000 146.83 .015 1   1    .68     1       97.8     25     1     1           5       .8         1.5      .6
 
-
-
-;i1 0  3000    415  .8   1  .1         .15
-;i1 .4  3000     36  .7   1  .121 .85
-
-
-
-;i1 .39 2000     184   .5   1   .0254111       .15
-
-
-;i1 0 3000   55 15 2
-;i1 0 3000   82.4 15 2 .7
-;i1 .5 40000 123.4 15 1
-
-;          envpersec
-;i2 0    1  3
-
-;i s dur scale revtime
-;i3 0 20 .1     10
-;i100 0 30
-
-;i1 0 3000 277 15 2
-;i1 0 3000 415 15 2
-
-;i99 0 4000 .5
 
 </CsScore>
 </CsoundSynthesizer>

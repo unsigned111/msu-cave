@@ -30,7 +30,7 @@ func makeEEG() neurosky.EEG {
 
 func makeState() State {
 	state := State{}
-	state.TestUpdateHeadsetOn(true)
+	state.UpdateHeadsetOn(true)
 	state.UpdateEEG(makeEEG())
 	return state
 }
@@ -56,8 +56,20 @@ func TestUpdateEEG(t *testing.T) {
 
 func TestUpdateHeadsetOn(t *testing.T) {
 	state := State{}
-	state.TestUpdateHeadsetOn(true)
+	state.UpdateHeadsetOn(true)
 	assert.Equal(t, true, state.HeadsetOn)
+}
+
+func TestUpdateAttention(t *testing.T) {
+	state := State{}
+	state.UpdateAttention(7)
+	assert.Equal(t, 7, state.Attention)
+}
+
+func TestUpdateMeditation(t *testing.T) {
+	state := State{}
+	state.UpdateMeditation(9)
+	assert.Equal(t, 9, state.Meditation)
 }
 
 func TestJSONSerialization(t *testing.T) {
