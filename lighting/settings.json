@@ -1,6 +1,6 @@
 {
   "ListenIP": "127.0.0.1",
-  "ControlIP":"10.0.0.22",
+  "ControlIP":"10.0.0.11",
   "ListenPort":7771,
   "ControlPort":6454,
 
