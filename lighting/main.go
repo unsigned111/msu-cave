@@ -60,7 +60,7 @@ func oscListen() {
 	})
 	server.Handle("/similarity", func(msg *osc.Message) {
 		value := msg.Arguments[0]
-		handleSimilarity(float64(value.(int32)))
+		handleSimilarity(float64(value.(float64)))
 	})
 	server.ListenAndServe()
 }
