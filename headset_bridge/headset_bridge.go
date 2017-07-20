@@ -50,6 +50,8 @@ func aggregateor(
 		select {
 		case eeg := <-hub.EEG:
 			state.UpdateEEG(eeg)
+			sendData(state, url)
+			logData(state, logFile)
 		case headsetOn := <-hub.HeadsetOn:
 			state.UpdateHeadsetOn(headsetOn)
 		case attention := <-hub.Attention:
@@ -57,8 +59,6 @@ func aggregateor(
 		case meditation := <-hub.Meditation:
 			state.UpdateMeditation(meditation)
 		}
-		sendData(state, url)
-		logData(state, logFile)
 	}
 }
 
@@ -76,13 +76,13 @@ func makeRobot(
 			hub.EEG <- eeg
 		})
 
-		onOff := MakeOnOffModel(ON_OFF_THREASHOLD, ON_OFF_WINDOW_SIZE)
-		gobot.On(neuro.Event("signal"), func(data interface{}) {
-			sample := data.(uint8)
-			onOff.AddSample(sample)
-			isOn := onOff.isOn()
-			hub.HeadsetOn <- isOn
-		})
+		// onOff := MakeOnOffModel(ON_OFF_THREASHOLD, ON_OFF_WINDOW_SIZE)
+		// gobot.On(neuro.Event("signal"), func(data interface{}) {
+		// 	sample := data.(uint8)
+		// 	onOff.AddSample(sample)
+		// 	isOn := onOff.isOn()
+		// 	hub.HeadsetOn <- isOn
+		// })
 
 		// TODO:DLM: figure out why meditation and attention
 		// are not sending anything but 0
@@ -188,10 +188,10 @@ func main() {
 
 	// setup the channels
 	hub := Hub{
-		EEG:        make(chan neurosky.EEG),
-		HeadsetOn:  make(chan bool),
-		Attention:  make(chan int),
-		Meditation: make(chan int),
+		EEG:        make(chan neurosky.EEG, 64),
+		HeadsetOn:  make(chan bool, 64),
+		Attention:  make(chan int, 64),
+		Meditation: make(chan int, 64),
 	}
 
 	// init aggregator
