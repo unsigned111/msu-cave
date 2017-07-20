@@ -1,10 +1,5 @@
 var firebase= require('firebase');
 
-firebase.initializeApp({
-	serviceAccount : "./service-accnt.json",
-	databaseURL : "https://project01-b05c2.firebaseio.com/"
-});
-
 var ui = firebase.database().ref('installations/holter/ui');
 var off_button = ui.child('button01_off');
 var power_button = ui.child('button02_power');
@@ -29,7 +24,7 @@ for (i = 1; i<=5; i++) {
 off_button.on("value", function(snap) {
 	if (snap.val() == true) {
 		console.log("true");
-		shutdown_procedure(); 
+		shutdown_procedure();
 	}
 });
 
@@ -37,19 +32,19 @@ off_button.on("value", function(snap) {
 power_button.on("value", function(snap) {
 	if (snap.val() == true) {
 		console.log("poweroff true - turning off");
-		
+
 		off_button.set(false);
 		shutdown.set(false);
 		power_button.set(false);
-		//execSync('shutdown -h now'); 			
-	}	
+		//execSync('shutdown -h now');
+	}
 });
 
 
 function shutdown_procedure() {
 
 	//TODO add shutdown stuffs
-	
+
 	shutdown.set(true); //set to true if no errors come up
 }
 
