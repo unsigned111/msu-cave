@@ -4,7 +4,7 @@
 
 #!/bin/bash
 
-function write_file {
+write_file() {
 	echo "Generating interfaces file..."
 	cd ~/msu-cave/util/generate_interface_file/
 	address=$(echo $1 | tr -d '"')
@@ -16,11 +16,12 @@ function write_file {
 	echo "iface lo inet loopback" >> interfaces
 	echo "" >> interfaces
 	echo "# The primary network interface" >> interfaces
+	echo "auto $s"
 	echo "auto iface $2 inet static" >> interfaces
 	echo "	address $address" >> interfaces
-	echo "	netmask 255.255.0.0" >> interfaces
+	echo "	netmask 255.255.255.0" >> interfaces
 	echo "	network 10.0.0.0" >> interfaces
-	echo "	broadcast 10.1.255.255" >> interfaces
+	echo "	broadcast 10.0.0.255" >> interfaces
 	echo "	gateway 10.1.1.1" >> interfaces
 }
 
@@ -35,13 +36,20 @@ static_ip=$(curl https://msu-cave.firebaseio.com/config/pod_list/$pod/ip_address
 echo "Assigned IP address $static_ip"
 current_ip=$(hostname -I)
 echo "Current address: $Current_ip"
-echo "Static IP to be assigned: $static_ip"
 
 cd /sys/class/net/enx*/
 interface_mac=$(cat address)
 interface=$(echo "enx$interface_mac" | tr -d ':')
 
+cd ~/msu-cave/util/generate_interface_file/
+
+if [ -f "interfaces" ]
+then
+	rm interfaces
+fi
+
 write_file $static_ip $interface
 
+rm /etc/network/interfaces
 echo raspberry | sudo -kS mv interfaces /etc/network/interfaces
 #echo raspberry | sudo -kS reboot
