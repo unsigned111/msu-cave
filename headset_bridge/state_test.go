@@ -2,8 +2,8 @@ package main
 
 import (
 	"bytes"
-	"github.com/hybridgroup/gobot/platforms/neurosky"
 	"github.com/stretchr/testify/assert"
+	"gobot.io/x/gobot/platforms/neurosky"
 	"testing"
 )
 
@@ -15,8 +15,8 @@ func unstubNow() {
 	resetClockImplementation()
 }
 
-func makeEEG() neurosky.EEG {
-	return neurosky.EEG{
+func makeEEG() neurosky.EEGData {
+	return neurosky.EEGData{
 		Delta:    1,
 		HiAlpha:  2,
 		HiBeta:   3,
@@ -37,7 +37,7 @@ func makeState() State {
 	return state
 }
 
-func assertEqualEEG(t *testing.T, eeg neurosky.EEG, state State) {
+func assertEqualEEG(t *testing.T, eeg neurosky.EEGData, state State) {
 	assert.Equal(t, eeg.Delta, state.Delta)
 	assert.Equal(t, eeg.HiAlpha, state.HiAlpha)
 	assert.Equal(t, eeg.HiBeta, state.HiBeta)
