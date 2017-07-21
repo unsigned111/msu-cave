@@ -34,8 +34,8 @@ depend: pkg
 # an internet connection.  You will not be able to do this successfully
 # while off line.
 pkg:
-	go get -d -u github.com/hybridgroup/gobot/...
-	go install github.com/hybridgroup/gobot/platforms/neurosky
+	go get -d -u gobot.io/x/gobot/...
+	go get gobot.io/x/gobot/platforms/neurosky
 	go get github.com/parnurzeal/gorequest
 	go get github.com/stretchr/testify/assert
 

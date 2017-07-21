@@ -7,8 +7,8 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/hybridgroup/gobot"
-	"github.com/hybridgroup/gobot/platforms/neurosky"
+	"gobot.io/x/gobot"
+	"gobot.io/x/gobot/platforms/neurosky"
 )
 
 var DEFAULT_LOG_FILE_NAME string = ""
@@ -46,12 +46,15 @@ func aggregateor(
 	logFile *os.File,
 ) {
 	state := State{}
+	onOff := MakeOnOffModel(ON_OFF_THREASHOLD, ON_OFF_WINDOW_SIZE)
 	for {
 		select {
 		case eeg := <-hub.EEG:
 			state.UpdateEEG(eeg)
-		case headsetOn := <-hub.HeadsetOn:
-			state.UpdateHeadsetOn(headsetOn)
+		case signal := <-hub.Signal:
+			onOff.AddSample(signal)
+			isOn := onOff.isOn()
+			state.UpdateHeadsetOn(isOn)
 		case attention := <-hub.Attention:
 			state.UpdateAttention(attention)
 		case meditation := <-hub.Meditation:
@@ -66,35 +69,30 @@ func makeRobot(
 	device string,
 	hub Hub,
 ) *gobot.Robot {
-	adaptor := neurosky.NewNeuroskyAdaptor("neurosky", device)
-	neuro := neurosky.NewNeuroskyDriver(adaptor, "neuro")
+	adaptor := neurosky.NewAdaptor(device)
+	neuro := neurosky.NewDriver(adaptor)
 
 	work := func() {
 
-		gobot.On(neuro.Event("eeg"), func(data interface{}) {
-			eeg := data.(neurosky.EEG)
+		neuro.On(neuro.Event("eeg"), func(data interface{}) {
+			eeg := data.(neurosky.EEGData)
 			hub.EEG <- eeg
 		})
 
-		onOff := MakeOnOffModel(ON_OFF_THREASHOLD, ON_OFF_WINDOW_SIZE)
-		gobot.On(neuro.Event("signal"), func(data interface{}) {
-			sample := data.(uint8)
-			onOff.AddSample(sample)
-			isOn := onOff.isOn()
-			hub.HeadsetOn <- isOn
+		neuro.On(neuro.Event("signal"), func(data interface{}) {
+			signal := data.(uint8)
+			hub.Signal <- signal
 		})
 
-		// TODO:DLM: figure out why meditation and attention
-		// are not sending anything but 0
-		// gobot.On(neuro.Event("attention"), func(data interface{}) {
-		// 	attention := data.(uint8)
-		// 	hub.Attention <- int(attention)
-		// })
-		//
-		// gobot.On(neuro.Event("meditation"), func(data interface{}) {
-		// 	meditation := data.(uint8)
-		// 	hub.Meditation <- int(meditation)
-		// })
+		neuro.On(neuro.Event("attention"), func(data interface{}) {
+			attention := data.(uint8)
+			hub.Attention <- int(attention)
+		})
+
+		neuro.On(neuro.Event("meditation"), func(data interface{}) {
+			meditation := data.(uint8)
+			hub.Meditation <- int(meditation)
+		})
 	}
 	robot := gobot.NewRobot(
 		"brainBot",
@@ -112,8 +110,8 @@ type AppArgs struct {
 }
 
 type Hub struct {
-	EEG        chan neurosky.EEG
-	HeadsetOn  chan bool
+	EEG        chan neurosky.EEGData
+	Signal     chan uint8
 	Attention  chan int
 	Meditation chan int
 }
@@ -148,7 +146,7 @@ func parseArgs() AppArgs {
 	return args
 }
 
-func cleanUpFunction(gbot *gobot.Gobot) func() {
+func cleanUpFunction(gbot *gobot.Robot) func() {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	return func() {
@@ -188,8 +186,8 @@ func main() {
 
 	// setup the channels
 	hub := Hub{
-		EEG:        make(chan neurosky.EEG),
-		HeadsetOn:  make(chan bool),
+		EEG:        make(chan neurosky.EEGData),
+		Signal:     make(chan uint8),
 		Attention:  make(chan int),
 		Meditation: make(chan int),
 	}
@@ -198,14 +196,10 @@ func main() {
 	go aggregateor(hub, args.Url, logFile)
 
 	// make the robot
-	robot1 := makeRobot(args.Device, hub)
-
-	// initialize gobot
-	gbot := gobot.NewGobot()
-	gbot.AddRobot(robot1)
-	gbot.Start()
+	robot := makeRobot(args.Device, hub)
+	robot.Start()
 
 	// set the ctrl-c handler
-	cleanup := cleanUpFunction(gbot)
+	cleanup := cleanUpFunction(robot)
 	go cleanup()
 }

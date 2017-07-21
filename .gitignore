@@ -7,6 +7,7 @@ credentials
 headset_bridge/headset_bridge*
 headset_bridge/pkg/*
 headset_bridge/src/*
+headset_bridge/tmp/*
 osc_src/pkg/*
 osc_src/src/*
 osc_src/osc_src*

@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/hybridgroup/gobot/platforms/neurosky"
+	"gobot.io/x/gobot/platforms/neurosky"
 	"io"
 	"reflect"
 	"time"
@@ -44,7 +44,7 @@ func (s *State) UpdateTimestamp() {
 	s.Timestamp = now()
 }
 
-func (s *State) UpdateEEG(eeg neurosky.EEG) {
+func (s *State) UpdateEEG(eeg neurosky.EEGData) {
 	s.UpdateTimestamp()
 	s.Delta = eeg.Delta
 	s.HiAlpha = eeg.HiAlpha

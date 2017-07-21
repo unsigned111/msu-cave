@@ -32,6 +32,8 @@ func makeState() State {
 	state := State{}
 	state.UpdateHeadsetOn(true)
 	state.UpdateEEG(makeEEG())
+	state.UpdateAttention(9)
+	state.UpdateMeditation(10)
 	return state
 }
 
@@ -80,7 +82,8 @@ func TestJSONSerialization(t *testing.T) {
 
 	expectedPayload := `{"timestamp":123456,"delta":1,"hiAlpha":2,`
 	expectedPayload += `"hiBeta":3,"loAlpha":4,"loBeta":5,"loGamma":6,`
-	expectedPayload += `"midGamma":7,"theta":8,"headsetOn":true}`
+	expectedPayload += `"midGamma":7,"theta":8,"headsetOn":true,`
+	expectedPayload += `"attention":9,"meditation":10}`
 
 	assert.Equal(t, expectedPayload, payload)
 
@@ -92,7 +95,8 @@ func TestLogHeader(t *testing.T) {
 	LogHeader(buffer)
 
 	expectedHeader := "Timestamp,Delta,HiAlpha,HiBeta,LoAlpha,"
-	expectedHeader += "LoBeta,LoGamma,MidGamma,Theta,HeadsetOn\n"
+	expectedHeader += "LoBeta,LoGamma,MidGamma,Theta,HeadsetOn,"
+	expectedHeader += "Attention,Meditation\n"
 
 	assert.Equal(t, expectedHeader, buffer.String())
 }
@@ -104,7 +108,7 @@ func TestLogData(t *testing.T) {
 	buffer := bytes.NewBufferString("")
 	state.LogData(buffer)
 
-	expectedData := "123456,1,2,3,4,5,6,7,8,true\n"
+	expectedData := "123456,1,2,3,4,5,6,7,8,true,9,10\n"
 	assert.Equal(t, expectedData, buffer.String())
 
 	unstubNow()
