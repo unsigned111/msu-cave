@@ -9,7 +9,7 @@ git pull
 
 mac=$(cat /sys/class/net/wlan0/address)
 pod=$(curl https://msu-cave.firebaseio.com/config/pi_list/$mac/pod.json)
-ip=$(curl https://msu-cave.firebaseio.com/config/pod_list/$pod/ip_address.json)
+ip=$(echo $(curl https://msu-cave.firebaseio.com/config/pod_list/$pod/ip_address.json) | tr -d '"')
 
 if [ $(hostname -I) == $ip ]
 then
@@ -22,7 +22,7 @@ then
 	cd ~/msu-cave/
 	./start
 else
-	./util/generate_interface_file/generate-interface.sh
+	echo raspberry | sudo -kS ./util/generate_interface_file/generate-interface.sh
 	#echo "Replacing interfaces file"
 	#echo raspberry | sudo -kS mv interfaces /sys/network/interfaces
 	#echo "Rebooting..."

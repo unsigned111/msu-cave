@@ -20,5 +20,5 @@ fi
 PATH="$HOME/bin:$HOME/.local/bin:$PATH"
 
 cd ~/msu-cave/util/
-./startup-script.sh
+#./startup-script.sh
 cd ~
