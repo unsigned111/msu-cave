@@ -14,7 +14,7 @@ var lastColor LightingColor
 var settings Settings
 var headsetOn bool
 var headsetLock sync.Mutex
-var similarity float64
+var similarity float32
 var similarityLock sync.Mutex
 var colorChannel = make(chan LightingColor, 512)
 var debug bool
@@ -60,7 +60,7 @@ func oscListen() {
 	})
 	server.Handle("/similarity", func(msg *osc.Message) {
 		value := msg.Arguments[0]
-		handleSimilarity(float64(value.(float64)))
+		handleSimilarity(float32(value.(float32)))
 	})
 	server.ListenAndServe()
 }
@@ -119,7 +119,7 @@ func handleOnOff(value int) {
 	headsetLock.Unlock()
 }
 
-func handleSimilarity(value float64) {
+func handleSimilarity(value float32) {
 	similarityLock.Lock()
 	similarity = value
 	if debug {
@@ -141,7 +141,7 @@ func activeLighting(value int) {
 
 		var nextColor LightingColor
 		var target float32
-		var intensity = int(float32(float64(settings.MaxIntensity - settings.MinIntensity) * similarity)) + settings.MinIntensity
+		var intensity = int(float32(float32(settings.MaxIntensity - settings.MinIntensity) * similarity)) + settings.MinIntensity
 
 		// if we have received a 0 value, use the last frame instead
 		if value == 0 {
