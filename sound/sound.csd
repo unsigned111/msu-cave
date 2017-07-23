@@ -49,9 +49,9 @@ instr 1
 	kk OSClisten gihandle, "/onoff", "i", konoff
 	kk OSClisten gihandle, "/similarity", "f", ksim
 
-	printks "%i %i %i %i %i %i %i %i %i\\n", 0, kCount, kf1, kf2, kf3, kf4, kf5, kf6, kf7, kf8	
-	printks "toggle is %i\\n", 0, konoff	
-	printks "similarity is %f\\n", 0, ksim
+	;printks "%i %i %i %i %i %i %i %i %i\\n", 0, kCount, kf1, kf2, kf3, kf4, kf5, kf6, kf7, kf8	
+	;printks "toggle is %i\\n", 0, konoff	
+	;printks "similarity is %f\\n", 0, ksim
 
 if (konoff == 0) then 
 	kgoto noamp
