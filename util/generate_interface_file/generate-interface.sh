@@ -16,8 +16,8 @@ write_file() {
 	echo "iface lo inet loopback" >> interfaces
 	echo "" >> interfaces
 	echo "# The primary network interface" >> interfaces
-	echo "auto $s"
-	echo "auto iface $2 inet static" >> interfaces
+	echo "auto $2" >> interfaces
+	echo "iface $2 inet static" >> interfaces
 	echo "	address $address" >> interfaces
 	echo "	netmask 255.255.255.0" >> interfaces
 	echo "	network 10.0.0.0" >> interfaces
@@ -49,7 +49,3 @@ then
 fi
 
 write_file $static_ip $interface
-
-rm /etc/network/interfaces
-echo raspberry | sudo -kS mv interfaces /etc/network/interfaces
-#echo raspberry | sudo -kS reboot

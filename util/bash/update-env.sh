@@ -12,5 +12,6 @@ copy_as_hidden bash_profile
 copy_as_hidden bashrc
 copy_as_hidden vimrc
 copy_as_hidden profile
+copy_as_hidden tmux.conf
 
 echo "Successfully updated env files"
