@@ -7,8 +7,9 @@ echo "#######################################"
 echo " MONTANA STATE UNIVERSITY"
 echo " NeuroCAVE"
 echo " Connected to $hostname"
-date
-uptime
+echo " $(cat /sys/class/net/wlan0/address)"
+echo " $(date)"
+echo " $(uptime)"
 echo "#######################################"
 echo
 
