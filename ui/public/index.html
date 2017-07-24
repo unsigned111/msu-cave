@@ -38,6 +38,7 @@
 		<p>Click to begin shutdown, then wait for confirmation message. </p>
 		<button id="offbutton" onclick="toggleOff()">Begin shutdown</button>
 		<div class="loader" id="pending"></div>
+		<p id="pod1-status"></p>
 		<div id="response">Shutdown procedure successful. Click to confirm power off.</div>
 		<button id="poweroff" onclick="poweroff()">Confirm power off</button>
     </div>
@@ -48,8 +49,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js">
 	<script src="index.js" type="text/javascript"></script>
 	
-
-    <script>
+    <script> 
         // const firebase = require('firebase');
         firebase.initializeApp({
             apiKey: "AIzaSyBMcXd3cG8JoinbmykBtXyWTJZn9P-XYDY",
@@ -65,13 +65,14 @@
 
 			const ui = firebase.database().ref('installations/holter/ui');
     		const pod1 = ui.child('pod-1');
+    		const pod2 = ui.child('pod-2');
 			const off_button = ui.child('button01_off');
 			const power_button = ui.child('button02_power');
 
+			
 			off_button.set(false);
 			power_button.set(false);
 			
-		//	newChild();
 
 //     	    pod1.once('value').then(function (snap) {
 // 				snap.forEach(function(childsnap) {
@@ -103,13 +104,21 @@
 
 		//pod-1: toggle shutdown message for one pod.
 		 pod1.child('shutdown').on("value", function(snap) {
-			if (snap.val() == true) {
-				$("#response").show();
-				$("#poweroff").show();
-				$("#pending").hide();
-				document.getElementById("poweroff").scrollIntoView();
+			if (snap.val() == true) {	
+				$('#pod1-status').css({ 'color' : '#4CAF50' }).text("✔ 4 processes terminated. 0 still running.");
+		        updateRunningProcesses();
 			}
+	
 		 });
+		 
+
+
+		function updateRunningProcesses() {
+			$("#response").show();
+			$("#poweroff").show();
+			$("#pending").hide();
+			document.getElementById("poweroff").scrollIntoView();
+		}
 
     	// Set off button to true, disable button, show loading image
     	function toggleOff() {
