@@ -11,10 +11,11 @@ firebase.auth().signInWithEmailAndPassword("admin@holter.com", "msu-cave-rocks")
             var errorMessage = error.message;
         });
 
+const pod = 'pod-1/shutdown'; //change later to correct pod id
 var ui = firebase.database().ref('installations/holter/ui');
 var off_button = ui.child('button01_off');
 var power_button = ui.child('button02_power');
-var shutdown = ui.child('pod-1/shutdown');
+var shutdown = ui.child(pod);
 
 
 //set all pods to false - for testing purposes 
@@ -30,11 +31,6 @@ function setFalse() {
 	}
 }
 
-function newChild() {
-	ui.child('pod-2').set( {
-	'shutdown' : false
-});
-}
 
 // call shutdown function when button01_off is true
 off_button.on("value", function(snap) {
