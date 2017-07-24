@@ -68,11 +68,9 @@
     		const pod2 = ui.child('pod-2');
 			const off_button = ui.child('button01_off');
 			const power_button = ui.child('button02_power');
-
-			
+	
 			off_button.set(false);
-			power_button.set(false);
-			
+			power_button.set(false);		
 
 //     	    pod1.once('value').then(function (snap) {
 // 				snap.forEach(function(childsnap) {
@@ -105,15 +103,47 @@
 		//pod-1: toggle shutdown message for one pod.
 		 pod1.child('shutdown').on("value", function(snap) {
 			if (snap.val() == true) {	
-				$('#pod1-status').css({ 'color' : '#4CAF50' }).text("✔ 4 processes terminated. 0 still running.");
-		        updateRunningProcesses();
+		        checkStatus(pod1);
+		        showPowerButton();
 			}
-	
 		 });
 		 
+		 ui.child('pods').on('value', function(snap) {
+		 		var ref = snap.ref();
+		 		var parent = ref.parent().key;
+		 		console.log('key = ' + snap.key);
+		 		console.log('value = ' + snap.val());
+		 		console.log('parent = ' + parent);
+		 });
 
+		function checkStatus(podId) {
+			var numOn = 0;
+			var numOff = 0;
+			
+			podId.once('value').then(function (snap) {
+				snap.forEach(function (childsnap) {
 
-		function updateRunningProcesses() {
+					if (childsnap.val() == true) {
+						numOn++;
+					}		
+					else {
+						numOff++;
+					}
+				});
+				
+				// Red text if more than one process is still on (true)
+				// 'shutdown' is currently being counted as 1 running process 
+				 if (numOn > 1) {  
+					$('#pod1-status').css({ 'color' : 'red' }).text("✘ Pod-1: " + numOff + " processes terminated. " + numOn + " still running.");
+				 }
+				 // Green text when all processes are off (false)
+				 else {	
+					$('#pod1-status').css({ 'color' : '#4CAF50' }).text("✔ Pod-1: " + numOff + " processes terminated. " + numOn + " still running.");			
+				}
+			});		
+		}
+
+		function showPowerButton() {
 			$("#response").show();
 			$("#poweroff").show();
 			$("#pending").hide();
