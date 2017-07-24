@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+kill -9 $(ps -ef | grep "[m]ain.js" | awk '{ print $2 }')
+./headset_bridge/unattach

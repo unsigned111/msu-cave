@@ -13,9 +13,6 @@ import (
 
 var DEFAULT_LOG_FILE_NAME string = ""
 
-const ON_OFF_THREASHOLD = .5
-const ON_OFF_WINDOW_SIZE = 3
-
 func sendData(state State, url string) {
 	payload := state.AsPayload()
 	request := gorequest.New()
@@ -46,22 +43,24 @@ func aggregateor(
 	logFile *os.File,
 ) {
 	state := State{}
-	onOff := MakeOnOffModel(ON_OFF_THREASHOLD, ON_OFF_WINDOW_SIZE)
+	lastSend := state.Timestamp
 	for {
 		select {
 		case eeg := <-hub.EEG:
 			state.UpdateEEG(eeg)
 		case signal := <-hub.Signal:
-			onOff.AddSample(signal)
-			isOn := onOff.isOn()
-			state.UpdateHeadsetOn(isOn)
+			state.UpdateSignal(signal)
 		case attention := <-hub.Attention:
 			state.UpdateAttention(attention)
 		case meditation := <-hub.Meditation:
 			state.UpdateMeditation(meditation)
 		}
-		sendData(state, url)
-		logData(state, logFile)
+
+		if lastSend < state.Timestamp {
+			sendData(state, url)
+			logData(state, logFile)
+			lastSend = state.Timestamp
+		}
 	}
 }
 
@@ -81,7 +80,7 @@ func makeRobot(
 
 		neuro.On(neuro.Event("signal"), func(data interface{}) {
 			signal := data.(uint8)
-			hub.Signal <- signal
+			hub.Signal <- int(signal)
 		})
 
 		neuro.On(neuro.Event("attention"), func(data interface{}) {
@@ -111,7 +110,7 @@ type AppArgs struct {
 
 type Hub struct {
 	EEG        chan neurosky.EEGData
-	Signal     chan uint8
+	Signal     chan int
 	Attention  chan int
 	Meditation chan int
 }
@@ -187,7 +186,7 @@ func main() {
 	// setup the channels
 	hub := Hub{
 		EEG:        make(chan neurosky.EEGData),
-		Signal:     make(chan uint8),
+		Signal:     make(chan int),
 		Attention:  make(chan int),
 		Meditation: make(chan int),
 	}

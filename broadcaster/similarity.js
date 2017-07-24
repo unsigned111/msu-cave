@@ -130,10 +130,11 @@ class SignalBank {
 
   addSamples(samples) {
     for (let key in samples) {
-      const rawData = samples[key].raw_data;
+      const sample = samples[key]
+      const headsetOn = sample.headsetOn;
+      const rawData = sample.raw_data;
       const value = rawData.delta;
       const time = rawData.timestamp;
-      const headsetOn = rawData.headsetOn;
 
       const target = this.getSignal(key);
       target.addSample(time, value, headsetOn);

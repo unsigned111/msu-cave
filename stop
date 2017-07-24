@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
-./broadcaster/kill_broadcaster
-./headset_bridge/kill_bridge
+./broadcaster/stop
+./headset_bridge/stop

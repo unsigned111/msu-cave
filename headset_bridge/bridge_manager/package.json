@@ -1,0 +1,21 @@
+{
+  "name": "process_manager",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "mocha --ui tdd"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "node-osc": "^2.0.3",
+    "sinon": "^2.3.8",
+    "yargs": "4.8.1"
+  },
+  "devDependencies": {
+    "chai": "3.5.0",
+    "mocha": "2.5.3"
+  }
+}

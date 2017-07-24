@@ -24,6 +24,7 @@ class FirebaseBroadcaster {
     let payload = {};
     payload = {
       raw_data: data,
+      headsetOn: data.onOffModel.isOn(),
       timestamp: {
         server: firebase.database.ServerValue.TIMESTAMP,
         node: (new Date()).getTime()
@@ -60,25 +61,13 @@ class OSCBroadcaster {
     this.clients.forEach((client) => client.send(channel, data));
   }
 
-  publishHeadset(data) {
+  publishHeadset(state) {
     // Send an eeg OSC message
-    const eegData = [
-      data.timestamp,
-      data.delta,
-      data.hiAlpha,
-      data.hiBeta,
-      data.loAlpha,
-      data.loBeta,
-      data.loGamma,
-      data.midGamma,
-      data.theta,
-    ];
+    const eegData = state.toOscEeg()
     this.publishToAll("/eeg", eegData);
 
     // Send an on/off OSC message
-    const onOffData = [
-      data.headsetOn ? 1 : 0,
-    ]
+    const onOffData = state.toOscOnOff()
     this.publishToAll("/onoff", onOffData);
   }
 

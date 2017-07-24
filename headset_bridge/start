@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+target_address=$(./util/fetch_firebase_data.sh | jq .target_address)
+./headset_bridge/attach "$target_address"
+(cd headset_bridge/bridge_manager; ./main.js -p 7772 -a "${target_address}")

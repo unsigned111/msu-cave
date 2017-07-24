@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
 
+./headset_bridge/start &
 forego start

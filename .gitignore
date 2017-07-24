@@ -1,4 +1,5 @@
 *node_modules
+*DS_Store
 
 # good place to put all of the projects credentials so that they do not
 # get check into version control accidentally.
@@ -12,3 +13,4 @@ osc_src/pkg/*
 osc_src/src/*
 osc_src/osc_src*
 lighting/lighting.arm
+lighting/lighting

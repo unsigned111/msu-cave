@@ -26,18 +26,18 @@ func now() int {
 }
 
 type State struct {
-	Timestamp  int  `json:"timestamp"`
-	Delta      int  `json:"delta"`
-	HiAlpha    int  `json:"hiAlpha"`
-	HiBeta     int  `json:"hiBeta"`
-	LoAlpha    int  `json:"loAlpha"`
-	LoBeta     int  `json:"loBeta"`
-	LoGamma    int  `json:"loGamma"`
-	MidGamma   int  `json:"midGamma"`
-	Theta      int  `json:"theta"`
-	HeadsetOn  bool `json:"headsetOn"`
-	Attention  int  `json:"attention"`
-	Meditation int  `json:"meditation"`
+	Timestamp  int `json:"timestamp"`
+	Delta      int `json:"delta"`
+	HiAlpha    int `json:"hiAlpha"`
+	HiBeta     int `json:"hiBeta"`
+	LoAlpha    int `json:"loAlpha"`
+	LoBeta     int `json:"loBeta"`
+	LoGamma    int `json:"loGamma"`
+	MidGamma   int `json:"midGamma"`
+	Theta      int `json:"theta"`
+	Signal     int `json:"signal"`
+	Attention  int `json:"attention"`
+	Meditation int `json:"meditation"`
 }
 
 func (s *State) UpdateTimestamp() {
@@ -56,9 +56,9 @@ func (s *State) UpdateEEG(eeg neurosky.EEGData) {
 	s.Theta = eeg.Theta
 }
 
-func (s *State) UpdateHeadsetOn(headsetOn bool) {
+func (s *State) UpdateSignal(signal int) {
 	s.UpdateTimestamp()
-	s.HeadsetOn = headsetOn
+	s.Signal = signal
 }
 
 func (s *State) UpdateAttention(attention int) {

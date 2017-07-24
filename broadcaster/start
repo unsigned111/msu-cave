@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+firebase_data=$(./util/fetch_firebase_data.sh)
+installation=$(echo $firebase_data | jq .installation)
+id=$(echo $firebase_data | jq .id)
+
+while true; do
+    (cd broadcaster && \
+        node main.js -i ${installation} -e ${id} \
+        -o 127.0.0.1:7770 127.0.0.1:7771 127.0.0.1:7772)
+done
